@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>معهد بدر السلام</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{
+    font-family:'Cairo',sans-serif;
+    margin:0;
+    background:linear-gradient(180deg,#0e3b2e,#06241c);
+    color:white;
+    text-align:center;
+}
+
+/* الهيدر */
+.top-header{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:25px;
+    margin-top:35px;
+    flex-wrap:wrap;
+}
+
+/* الشعار */
+.logo-box{
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    overflow:hidden;
+    border:5px solid #d4af37;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    animation:goldGlow 3s infinite alternate;
+}
+
+.logo-box img{
+    width:170px;
+}
+
+/* توهج ذهبي */
+@keyframes goldGlow{
+    from{box-shadow:0 0 10px #d4af37;}
+    to{box-shadow:0 0 40px #ffd700;}
+}
+
+/* اسم الموقع */
+.site-title{
+    font-size:36px;
+    font-weight:bold;
+    color:#f5d06f;
+    min-height:45px; /* للحفاظ على ارتفاع ثابت أثناء ظهور الحروف */
+    white-space:nowrap;
+    overflow:hidden;
+    display:inline-block;
+}
+
+/* البطاقات */
+.container{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr); /* صفين لكل صف */
+    gap:28px;
+    max-width:800px;
+    margin:50px auto;
+    padding:20px;
+}
+
+/* البطاقة */
+.card{
+    background:#114a3a;
+    border-radius:18px;
+    border:2px solid #d4af37;
+    text-decoration:none;
+    color:white;
+    overflow:hidden;
+    transition:0.35s;
+    box-shadow:0 6px 20px rgba(0,0,0,0.5);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+/* صورة البطاقة دائرية */
+.card img{
+    width:120px;
+    height:120px;
+    object-fit:cover;
+    border-radius:50%;
+    margin-bottom:10px;
+}
+
+/* النص */
+.card p{
+    padding:0;
+    font-size:18px;
+    font-weight:bold;
+    color:#f3d37a;
+}
+
+/* تأثير الحركة */
+.card:hover{
+    transform:translateY(-8px) scale(1.05);
+    background:#17614c;
+    box-shadow:0 10px 25px rgba(0,0,0,0.7);
+}
+</style>
+</head>
+<body>
+
+<div class="top-header">
+    <div class="logo-box">
+        <img src="https://i.postimg.cc/bNqb3yWJ/5866036315810368735-121.jpg">
+    </div>
+</div>
+
+<!-- النص تحت الشعار -->
+<div class="site-title" id="animatedText">معهد بدر السلام</div>
+
+<div class="container">
+<a href="Maad.html" class="card"><img src="https://i.postimg.cc/MKQdRKCP/5866036315810368746-121.jpg"><p>المدرس معاذ المحمد</p></a>
+<a href="Awad.html" class="card"><img src="https://i.postimg.cc/kXs9C3CT/5866036315810368745-121.jpg"><p>المدرس عوض فطراوي</p></a>
+<a href="Taha.html" class="card"><img src="https://i.postimg.cc/rFVXQn49/5866036315810368748-121.jpg"><p>المدرس طه المحمد</p></a>
+<a href="Modar.html" class="card"><img src="https://i.postimg.cc/50BTmL2c/5866036315810368747-121.jpg"><p>المدرس مضر الشعار</p></a>
+<a href="Tarage.html" class="card"><img src="https://i.postimg.cc/KvHqBJDP/5866036315810368737-121.jpg"><p>المدرسة تراجي المصطفى</p></a>
+<a href="Tahane.html" class="card"><img src="https://i.postimg.cc/9QNDWq2n/5866036315810368736-121.jpg"><p>المدرسة تهاني</p></a>
+<a href="Marwa.html" class="card"><img src="https://i.postimg.cc/6Q5fPZcT/5866036315810368740-121.jpg"><p>المدرسة مروى المصطفى</p></a>
+<a href="Rawda.html" class="card"><img src="https://i.postimg.cc/8c8WTfRC/5866036315810368744-121.jpg"><p>المدرسة روضى المصطفى</p></a>
+<a href="FatemaF.html" class="card"><img src="https://i.postimg.cc/fy2NxmBp/5866036315810368742-121.jpg"><p>المدرسة فاطمة فطراوي</p></a>
+<a href="FatemaM.html" class="card"><img src="https://i.postimg.cc/NjRntRR6/5866036315810368739-121.jpg"><p>المدرسة فاطمة المحمود</p></a>
+<a href="Aia.html" class="card"><img src="https://i.postimg.cc/6q3s5TBK/5866036315810368743-121.jpg"><p>المدرسة اية الايوب</p></a>
+<a href="Aliaa.html" class="card"><img src="https://i.postimg.cc/cCsx7sZF/5866036315810368741-121.jpg"><p>المدرسة علياء عبدالقادر</p></a>
+</div>
+
+<script>
+// تأثير تركيب الحروف حرفا حرفا
+const textElement = document.getElementById('animatedText');
+const text = textElement.textContent;
+textElement.textContent = '';
+
+let index = 0;
+
+function typeEffect() {
+    if (index < text.length) {
+        textElement.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeEffect, 150); 
+    } else {
+        setTimeout(() => {
+            textElement.textContent = '';
+            index = 0;
+            typeEffect();
+        }, 2000);
+    }
+}
+
+typeEffect();
+</script>
+
+</body>
+</html>
