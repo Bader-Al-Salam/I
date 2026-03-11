@@ -612,11 +612,13 @@
                     <i id="theme-icon" class="fas fa-moon"></i>
                 </button>
 
-                <button class="btn-duty-settings" onclick="openDutySettings()" title="تحديد ساعات الدوام الافتراضية">
+                <!-- زر إعدادات الساعات (مخفي افتراضياً، يظهر فقط للمعلم) -->
+                <button id="btn-duty-settings" class="btn-duty-settings" style="display:none;" onclick="openDutySettings()" title="تحديد ساعات الدوام الافتراضية">
                     <i class="fas fa-clock"></i> <span>ساعات الدوام</span>
                 </button>
 
-                <button class="btn-students-mgr" onclick="openStudentManager()" title="إدارة قائمة الطلاب">
+                <!-- زر إدارة الطلاب (مخفي افتراضياً، يظهر فقط للمعلم) -->
+                <button id="btn-students-mgr" class="btn-students-mgr" style="display:none;" onclick="openStudentManager()" title="إدارة قائمة الطلاب">
                     <i class="fas fa-users"></i> <span>الطلاب</span>
                 </button>
 
@@ -1021,6 +1023,11 @@
 
         // --- إعدادات الساعات ---
         window.openDutySettings = () => {
+            // تحقق إضافي من الأمان
+            if (!auth.currentUser) {
+                showToast('يجب تسجيل الدخول للوصول لهذه الإعدادات', 'warning');
+                return;
+            }
             document.getElementById('default-duty-input').value = defaultDutyHours;
             document.getElementById('duty-settings-modal').style.display = 'flex';
         }
@@ -1073,6 +1080,11 @@
         };
         
         window.openStudentManager = () => {
+            // تحقق إضافي من الأمان
+            if (!auth.currentUser) {
+                showToast('يجب تسجيل الدخول لإدارة الطلاب', 'warning');
+                return;
+            }
             renderStudentList();
             const modal = document.getElementById('students-manager-modal');
             modal.style.display = 'flex';
@@ -1348,7 +1360,6 @@
             });
         }
 
-        // --- التعديل الجوهري: حفظ التقرير كبيانات في قاعدة البيانات ---
         window.generateAndSaveReport = async () => {
             const startDateStr = document.getElementById('report-start-date').value;
             const endDateStr = document.getElementById('report-end-date').value;
@@ -1374,13 +1385,11 @@
                 const batch = writeBatch(db);
                 let count = 0;
 
-                // نقوم بحساب البيانات من السجلات اليومية، ولكن نحفظها كسجلات جديدة
                 const dailyRecords = cachedSnapshot.docs.filter(docSnap => {
                     const d = docSnap.data();
                     return d.frequency === 'daily' && d.uoi && reportSelectedStudents.includes(d.qwe);
                 });
 
-                // استخدام خريطة لتجميع البيانات لكل طالب
                 const studentStats = {};
 
                 dailyRecords.forEach(docSnap => {
@@ -1396,7 +1405,6 @@
                     }
                 });
 
-                // الآن نحفظ سجل لكل طالب في التقرير الحالي
                 Object.keys(studentStats).forEach(studentName => {
                     const stats = studentStats[studentName];
                     
@@ -1407,7 +1415,7 @@
                         asd: stats.pages,
                         asdText: `${stats.pages} صفحة`,
                         dutyHours: stats.hours,
-                        frequency: selectedTrackingFreq, // 'weekly' أو 'monthly'
+                        frequency: selectedTrackingFreq, 
                         unit: "صفحة",
                         zxc: 'good',
                         nmk: `تقرير: ${startDateDisplay} - ${endDateDisplay}`,
@@ -1439,7 +1447,6 @@
             try {
                 const now = new Date();
                 const dayName = now.toLocaleDateString('ar-SY', { weekday: 'long' });
-                // التأكد من استخدام التردد الصحيح (يومي، أسبوعي، شهري)
                 let separatorFreq = selectedTrackingFreq; 
                 
                 if (currentView === 'reciters') {
@@ -1476,7 +1483,6 @@
                     studentData.frequency = 'stages';
                 } 
                 else {
-                    // سواء كان يومي، أسبوعي، أو شهري
                     studentData.frequency = separatorFreq;
                     studentData.attr = "present";
                     studentData.nmk = "";
@@ -1553,8 +1559,6 @@
                 pageTitle.textContent = customTitle || 'السجلات';
                 clearAllText.textContent = 'مسح الكل';
                 updateFormVisibility(auth.currentUser);
-                
-                // عرض البيانات المحفوظة في قاعدة البيانات
                 updateTableColumns('dashboard'); 
                 if (cachedSnapshot) renderTable(cachedSnapshot, 'dashboard');
             }
@@ -1567,10 +1571,10 @@
             headers[1].textContent = "المقدار";
             headers[2].textContent = "ساعات الدوام";
             headers[3].textContent = "التقييم";
-            headers[4].style.display = ''; // Score
+            headers[4].style.display = ''; 
             headers[5].textContent = "ملاحظات";
             headers[6].textContent = "التاريخ";
-            headers[7].style.display = ''; // Actions
+            headers[7].style.display = ''; 
         }
 
         function updateTableColumns(view) {
@@ -1659,12 +1663,20 @@
             const loginBtn = document.getElementById('btn-login-nav');
             const logoutBtn = document.getElementById('btn-logout');
             const userDisplay = document.getElementById('user-display');
+            // أزرار المعلم الخاصة
+            const dutySettingsBtn = document.getElementById('btn-duty-settings');
+            const studentsMgrBtn = document.getElementById('btn-students-mgr');
 
             if(user) {
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
                 userDisplay.style.display = 'inline-block';
                 userDisplay.textContent = `مرحباً`;
+                
+                // إظهار الأزرار الخاصة
+                dutySettingsBtn.style.display = 'flex';
+                studentsMgrBtn.style.display = 'flex';
+                
                 updateFormVisibility(user);
                 loadStudents();
                 
@@ -1675,6 +1687,11 @@
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
                 userDisplay.style.display = 'none';
+                
+                // إخفاء الأزرار الخاصة عند الخروج
+                dutySettingsBtn.style.display = 'none';
+                studentsMgrBtn.style.display = 'none';
+                
                 updateFormVisibility(null);
             }
         });
@@ -1930,7 +1947,6 @@
                 toggleEditButton('#btn-submit-stage', 'تحديث المرحلة', '#btn-cancel-stage');
             } 
             else {
-                // التأكد من الانتقال للوحة الصحيحة
                 if(data.frequency === 'daily') openTracking('daily');
                 else if(data.frequency === 'weekly') openTracking('weekly');
                 else if(data.frequency === 'monthly') openTracking('monthly');
@@ -2069,7 +2085,6 @@
                     let isVisible = false;
 
                     if (currentView === 'dashboard') {
-                        // المفتاح: استخدام selectedTrackingFreq لضمان فصل اليومي عن الأسبوعي والشهري
                         if (d.frequency === selectedTrackingFreq && d.unit !== 'جزء' && d.frequency !== 'stages') {
                             isVisible = true;
                         }
@@ -2262,11 +2277,9 @@
             
             let skipMode = false;
             
-            // حساب colSpan بناءً على الأعمدة الظاهرة
-            // 1:Student, 2:Amount, 3:Hours, 4:Rating, 5:Score, 6:Notes, 7:Date, 8:Actions
             let colSpanCount = 6; 
-            if (targetView === 'reciters' || targetView === 'stages') colSpanCount++; // +1 Score
-            if (isAdmin) colSpanCount++; // +1 Actions
+            if (targetView === 'reciters' || targetView === 'stages') colSpanCount++; 
+            if (isAdmin) colSpanCount++; 
 
             if(snap.empty) { 
                 empty.style.display='block'; 
@@ -2388,7 +2401,6 @@
                     let badgeText = '';
 
                     if (targetView === 'dashboard') {
-                        // الفلترة تعتمد على selectedTrackingFreq (يومي/أسبوعي/شهري)
                         if (d.frequency === selectedTrackingFreq && d.unit !== 'جزء' && d.frequency !== 'stages') {
                             isVisible = true;
                         }
