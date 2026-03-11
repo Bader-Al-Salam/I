@@ -294,6 +294,17 @@
         .separator-label-container.has-hidden .hidden-count {
             display: inline-block;
         }
+        
+        /* عرض عدد الساعات على شريط الفصل */
+        .separator-hours {
+            background-color: #d97706;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+            margin-right: 10px;
+        }
 
         .separator-delete-btn {
             position: absolute;
@@ -546,6 +557,28 @@
             background-color: var(--primary-dark);
         }
 
+        /* تنسيق صف التقرير الكبير (الفراغ الكبير) */
+        .summary-row {
+            background-color: #f0fdf4;
+            border-bottom: 2px solid var(--success);
+        }
+        body.dark-mode .summary-row {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+        .summary-content {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding: 10px 0;
+        }
+        .summary-value {
+            color: #d97706;
+            font-size: 1.4rem;
+        }
+
         @keyframes popIn {
             from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
@@ -612,12 +645,12 @@
                     <i id="theme-icon" class="fas fa-moon"></i>
                 </button>
 
-                <!-- زر إعدادات الساعات (مخفي افتراضياً، يظهر فقط للمعلم) -->
-                <button id="btn-duty-settings" class="btn-duty-settings" style="display:none;" onclick="openDutySettings()" title="تحديد ساعات الدوام الافتراضية">
-                    <i class="fas fa-clock"></i> <span>ساعات الدوام</span>
+                <!-- زر إعدادات الساعات (يحدد ساعات اليوم للشريط الأحمر) -->
+                <button id="btn-duty-settings" class="btn-duty-settings" style="display:none;" onclick="openDutySettings()" title="تحديد ساعات الدوام لليوم">
+                    <i class="fas fa-clock"></i> <span>ساعات اليوم</span>
                 </button>
 
-                <!-- زر إدارة الطلاب (مخفي افتراضياً، يظهر فقط للمعلم) -->
+                <!-- زر إدارة الطلاب -->
                 <button id="btn-students-mgr" class="btn-students-mgr" style="display:none;" onclick="openStudentManager()" title="إدارة قائمة الطلاب">
                     <i class="fas fa-users"></i> <span>الطلاب</span>
                 </button>
@@ -724,11 +757,9 @@
                         </div>
                     </div>
 
+                    <!-- تم إزالة حقل ساعات الدوام من هنا حسب الطلب -->
+                    
                     <div class="input-row" style="margin-top: 1rem;">
-                        <div class="form-group">
-                            <label>ساعات الدوام</label>
-                            <input type="number" id="duty-hours" class="form-control" placeholder="عدد الساعات" min="0" step="0.5">
-                        </div>
                         <div class="form-group"><label>التقييم</label><select id="level" class="form-control" required><option value="" disabled selected>اختر التقييم...</option><option value="excellent">ممتاز</option><option value="good">جيد</option><option value="average">متوسط</option><option value="needs-improvement">ضعيف</option></select></div>
                         
                         <div class="form-group" id="attendance-group">
@@ -865,7 +896,7 @@
                             </select>
                         </div>
                         <div class="form-group"><label>الدرجة من 100%</label><input type="number" id="stages-score" class="form-control" min="0" max="100" placeholder="100" required></div>
-                        <div class="form-group"><label>التقييم</label><select id="stages-level" class="form-control" required><option value="" disabled selected>اختر التقييم...</option><option value="excellent">ممتاز</option><option value="good">جيد</option><option value="average">متوسط</option><option value="needs-improvement">ضعيف</option></select></div>
+                        <div class="form-group"><label>التقييم</label><select id="stages-level" class="form-control" required><option value="" disabled selected="اختر التقييم..."><option value="excellent">ممتاز</option><option value="good">جيد</option><option value="average">متوسط</option><option value="needs-improvement">ضعيف</option></select></div>
                     </div>
                     <div class="form-group" style="margin-top:10px;"><label>ملاحظات</label><input type="text" id="stages-notes" class="form-control" placeholder="ملاحظات..."></div>
                     <div style="text-align:left; margin-top: 1rem;">
@@ -907,7 +938,7 @@
                             <tr>
                                 <th>الطالب</th>
                                 <th>المقدار</th>
-                                <th>ساعات الدوام</th>
+                                <!-- تمت إزالة عمود ساعات الدوام من الجدول كما طلب المستخدم -->
                                 <th>التقييم</th> 
                                 <th id="th-score" class="col-score" style="display:none;">الدرجة من 100%</th>
                                 <th>ملاحظات</th>
@@ -929,15 +960,15 @@
             <button class="close-modal" onclick="closeDutySettings()">&times;</button>
             
             <div class="dev-avatar" style="background: #d97706;"><i class="fas fa-clock"></i></div>
-            <h3 class="dev-name">إعدادات الدوام</h3>
-            <p class="dev-role">تحديد الساعات الافتراضية للطلاب</p>
+            <h3 class="dev-name">ساعات اليوم</h3>
+            <p class="dev-role">تحديد عدد الساعات التي سيتم وضعها على الشريط الأحمر والتقارير</p>
 
             <div class="form-group" style="text-align: right;">
-                <label>عدد الساعات الافتراضية</label>
-                <input type="number" id="default-duty-input" class="form-control" placeholder="مثال: 2.5" min="0" step="0.5">
+                <label>عدد الساعات لليوم</label>
+                <input type="number" id="default-duty-input" class="form-control" placeholder="مثال: 3" min="0" step="0.5">
             </div>
 
-            <button type="button" class="btn-submit" onclick="saveDutySettings()">حفظ الإعدادات</button>
+            <button type="button" class="btn-submit" onclick="saveDutySettings()">حفظ واستخدام</button>
         </div>
     </div>
 
@@ -1017,18 +1048,20 @@
         let editDocId = null;
         let allStudents = []; 
         let reportSelectedStudents = [];
-        let defaultDutyHours = localStorage.getItem('defaultDutyHours') || '';
+        
+        // متغير لتخزين ساعات اليوم الحالية التي يحددها المعلم
+        let todayTotalHours = 0; 
+        
         let isScreenshotMode = false;
         let collapsedSeparators = JSON.parse(localStorage.getItem('hifz_platform_collapsed') || '{}');
 
-        // --- إعدادات الساعات ---
+        // --- إعدادات الساعات (الشريط الأحمر) ---
         window.openDutySettings = () => {
-            // تحقق إضافي من الأمان
             if (!auth.currentUser) {
                 showToast('يجب تسجيل الدخول للوصول لهذه الإعدادات', 'warning');
                 return;
             }
-            document.getElementById('default-duty-input').value = defaultDutyHours;
+            document.getElementById('default-duty-input').value = todayTotalHours;
             document.getElementById('duty-settings-modal').style.display = 'flex';
         }
 
@@ -1038,15 +1071,9 @@
 
         window.saveDutySettings = () => {
             const val = document.getElementById('default-duty-input').value;
-            defaultDutyHours = val;
-            localStorage.setItem('defaultDutyHours', val);
+            todayTotalHours = parseFloat(val) || 0;
             
-            const currentDutyInput = document.getElementById('duty-hours');
-            if(currentDutyInput && currentDutyInput.value === '') {
-                currentDutyInput.value = val;
-            }
-
-            showToast('تم حفظ إعدادات الدوام', 'success');
+            showToast(`تم تحديد ساعات اليوم بـ ${todayTotalHours} ساعات`, 'success');
             closeDutySettings();
         }
 
@@ -1080,7 +1107,6 @@
         };
         
         window.openStudentManager = () => {
-            // تحقق إضافي من الأمان
             if (!auth.currentUser) {
                 showToast('يجب تسجيل الدخول لإدارة الطلاب', 'warning');
                 return;
@@ -1278,12 +1304,7 @@
             teacherPanel.style.display = 'none';
             reportPanel.style.display = 'none';
 
-            if(freq === 'daily') {
-                document.getElementById('duty-hours').value = defaultDutyHours;
-            }
-
             const rangeInputs = document.getElementById('range-inputs');
-            const dutyHoursGroup = document.getElementById('duty-hours').parentElement; 
             const levelGroup = document.getElementById('level').parentElement;
             const attendanceGroup = document.getElementById('attendance-group');
             const notesGroup = document.getElementById('notes').parentElement;
@@ -1291,7 +1312,6 @@
             if (freq === 'daily') {
                 teacherPanel.style.display = 'block';
                 rangeInputs.style.display = 'grid';
-                dutyHoursGroup.style.display = 'block';
                 levelGroup.style.display = 'block';
                 attendanceGroup.style.display = 'block';
                 notesGroup.style.display = 'block';
@@ -1398,10 +1418,9 @@
                     
                     if (docDate >= startDate && docDate <= endDate) {
                         if (!studentStats[d.qwe]) {
-                            studentStats[d.qwe] = { pages: 0, hours: 0 };
+                            studentStats[d.qwe] = { pages: 0 };
                         }
                         studentStats[d.qwe].pages += (d.asd || 0);
-                        studentStats[d.qwe].hours += (d.dutyHours || 0);
                     }
                 });
 
@@ -1414,7 +1433,6 @@
                         qwe: studentName,
                         asd: stats.pages,
                         asdText: `${stats.pages} صفحة`,
-                        dutyHours: stats.hours,
                         frequency: selectedTrackingFreq, 
                         unit: "صفحة",
                         zxc: 'good',
@@ -1425,6 +1443,33 @@
                     batch.set(newDocRef, dataPayload);
                     count++;
                 });
+
+                // --- إضافة صف "فراغ كبير" لساعات اليوم كما طلب المستخدم ---
+                // نجمع الساعات من الفواصل الموجودة في الفترة المحددة
+                let totalPeriodHours = 0;
+                cachedSnapshot.docs.forEach(docSnap => {
+                    const d = docSnap.data();
+                    if (d.type === 'separator' && d.separatorHours) {
+                        const docDate = d.uoi ? d.uoi.toDate() : new Date();
+                        if (docDate >= startDate && docDate <= endDate) {
+                            totalPeriodHours += d.separatorHours;
+                        }
+                    }
+                });
+
+                // إضافة سجل التلخيص (الفراغ الكبير)
+                if (totalPeriodHours > 0) {
+                    const summaryRef = doc(collection(db, "daily_records"));
+                    batch.set(summaryRef, {
+                        type: 'summary', // نوع جديد للتعريف
+                        qwe: "ملخص الساعات", 
+                        asd: totalPeriodHours,
+                        asdText: `مجموع ساعات الفترة`,
+                        frequency: selectedTrackingFreq,
+                        uoi: serverTimestamp()
+                    });
+                    count++;
+                }
 
                 if (count > 0) {
                     await batch.commit();
@@ -1442,8 +1487,15 @@
         }
 
         window.addSeparatorLine = async () => {
-            if(!confirm('هل تريد وضع الخط ')) return;
+            if(!confirm('هل تريد وضع الخط الفاصل؟ سيتم تطبيق عدد الساعات المحددة حالياً.')) return;
             
+            if(todayTotalHours === 0) {
+                if(!confirm('لم يتم تحديد عدد ساعات اليوم بعد. هل تريد المتابعة بـ 0 ساعة؟')) {
+                    openDutySettings();
+                    return;
+                }
+            }
+
             try {
                 const now = new Date();
                 const dayName = now.toLocaleDateString('ar-SY', { weekday: 'long' });
@@ -1455,46 +1507,16 @@
                     separatorFreq = 'stages';
                 }
 
+                // إضافة الفاصل مع تخزين عدد الساعات
                 await addDoc(collection(db, "daily_records"), {
                     type: 'separator',
                     frequency: separatorFreq, 
                     dayLabel: dayName, 
+                    separatorHours: todayTotalHours, // تخزين الساعات هنا
                     uoi: serverTimestamp()
                 });
 
-                let studentData = {
-                    qwe: "", 
-                    zxc: "", 
-                    uoi: serverTimestamp() 
-                };
-
-                if (separatorFreq === 'reciters') {
-                    studentData.asd = ""; 
-                    studentData.unit = "جزء";
-                    studentData.score = 0; 
-                    studentData.nmk = ""; 
-                    studentData.frequency = 'monthly'; 
-                } 
-                else if (separatorFreq === 'stages') {
-                    studentData.asd = 0;
-                    studentData.unit = "السدس الأول";
-                    studentData.score = 0;
-                    studentData.nmk = "";
-                    studentData.frequency = 'stages';
-                } 
-                else {
-                    studentData.frequency = separatorFreq;
-                    studentData.attr = "present";
-                    studentData.nmk = "";
-                    studentData.page_from = 0;
-                    studentData.page_to = 0;
-                    studentData.asd = 0;
-                    studentData.asdText = "";
-                }
-
-                await addDoc(collection(db, "daily_records"), studentData);
-
-                showToast('تم وضع الخط', 'success');
+                showToast('تم وضع الخط وتسجيل الساعات', 'success');
             } catch(err) {
                 console.error(err);
                 showToast('في خطا لان النت ضعيف ☢', 'error');
@@ -1569,12 +1591,12 @@
             const headers = document.getElementById('records-table').querySelectorAll('th');
             headers[0].textContent = "الطالب";
             headers[1].textContent = "المقدار";
-            headers[2].textContent = "ساعات الدوام";
-            headers[3].textContent = "التقييم";
-            headers[4].style.display = ''; 
-            headers[5].textContent = "ملاحظات";
-            headers[6].textContent = "التاريخ";
-            headers[7].style.display = ''; 
+            // تم إزالة عمود الساعات
+            headers[2].textContent = "التقييم";
+            headers[3].style.display = ''; 
+            headers[4].textContent = "ملاحظات";
+            headers[5].textContent = "التاريخ";
+            headers[6].style.display = ''; 
         }
 
         function updateTableColumns(view) {
@@ -1663,7 +1685,6 @@
             const loginBtn = document.getElementById('btn-login-nav');
             const logoutBtn = document.getElementById('btn-logout');
             const userDisplay = document.getElementById('user-display');
-            // أزرار المعلم الخاصة
             const dutySettingsBtn = document.getElementById('btn-duty-settings');
             const studentsMgrBtn = document.getElementById('btn-students-mgr');
 
@@ -1673,7 +1694,6 @@
                 userDisplay.style.display = 'inline-block';
                 userDisplay.textContent = `مرحباً`;
                 
-                // إظهار الأزرار الخاصة
                 dutySettingsBtn.style.display = 'flex';
                 studentsMgrBtn.style.display = 'flex';
                 
@@ -1688,7 +1708,6 @@
                 logoutBtn.style.display = 'none';
                 userDisplay.style.display = 'none';
                 
-                // إخفاء الأزرار الخاصة عند الخروج
                 dutySettingsBtn.style.display = 'none';
                 studentsMgrBtn.style.display = 'none';
                 
@@ -1859,7 +1878,6 @@
                 
                 let asdVal = 0;
                 let asdText = "";
-                const dutyHours = document.getElementById('duty-hours').value;
 
                 const from = document.getElementById('amount-from').value;
                 const to = document.getElementById('amount-to').value;
@@ -1880,8 +1898,8 @@
                     unit: "", 
                     zxc: level, 
                     frequency: frequency, 
-                    nmk: document.getElementById('notes').value,
-                    dutyHours: parseFloat(dutyHours) || 0
+                    nmk: document.getElementById('notes').value
+                    // تمت إزالة dutyHours من الحفظ
                 };
 
                 const fromVal = document.getElementById('amount-from').value;
@@ -1910,7 +1928,6 @@
                     document.getElementById('attendance').value = 'present';
                     document.getElementById('level').value = ""; 
                     document.getElementById('student-name').value = "";
-                    document.getElementById('duty-hours').value = defaultDutyHours; 
                 }
 
             } catch(err) { showToast('فشل الحفظ', 'error'); }
@@ -1957,12 +1974,6 @@
                 
                 if (data.attr) document.getElementById('attendance').value = data.attr;
                 
-                if (data.dutyHours !== undefined) {
-                    document.getElementById('duty-hours').value = data.dutyHours;
-                } else {
-                    document.getElementById('duty-hours').value = defaultDutyHours;
-                }
-                
                 if (data.page_from !== undefined && data.page_to !== undefined) {
                     document.getElementById('amount-from').value = data.page_from;
                     document.getElementById('amount-to').value = data.page_to;
@@ -1997,7 +2008,6 @@
             document.getElementById('amount-from').value = "";
             document.getElementById('amount-to').value = "";
             document.getElementById('amount-total').value = "";
-            document.getElementById('duty-hours').value = defaultDutyHours;
             document.getElementById('stages-amount').value = '1';
             document.getElementById('reciter-date').valueAsDate = new Date();
             document.getElementById('notes').value = "";
@@ -2186,11 +2196,43 @@
 
             const remainingColumnsCount = thead.querySelectorAll('th').length;
 
+            // --- التعديل هنا: تحديد نوع التقرير واليوم ---
+            const sepDoc = cachedSnapshot.docs.find(d => d.id === sepId);
+            let titlePrefix = "سجل";
+            let dayName = "";
+
+            if (sepDoc) {
+                const data = sepDoc.data();
+                dayName = data.dayLabel || "";
+                
+                if (data.frequency === 'weekly') {
+                    titlePrefix = "التقرير الأسبوعي";
+                } else if (data.frequency === 'monthly') {
+                    titlePrefix = "التقرير الشهري";
+                } else {
+                    titlePrefix = "سجل"; // Daily default
+                }
+            }
+
+            let fullTitle = titlePrefix;
+            if(dayName) {
+                fullTitle += ` (${dayName})`;
+            }
+            // ----------------------------------------------
+
+            // --- جلب الساعات وإضافتها للصورة ---
             const sepRowData = allRows[separatorIndex];
-            const sepLabel = sepRowData.querySelector('.separator-label-container span').innerText;
+            const hoursElement = sepRowData.querySelector('.separator-hours');
+            const hoursText = hoursElement ? hoursElement.innerText : '';
             
+            let titleHTML = fullTitle; 
+            if(hoursText) {
+                titleHTML += ` <div style="display:inline-block; background:#fef3c7; color:#d97706; padding:2px 8px; border-radius:4px; font-size:0.9em; margin-right:10px; font-weight:bold;">${hoursText}</div>`;
+            }
+            // --------------------------------------
+
             const titleRow = document.createElement('tr');
-            titleRow.innerHTML = `<td colspan="${remainingColumnsCount}" style="text-align:center; padding:15px; font-weight:bold; font-size:1.2rem; background:#f9fafb; border-bottom:2px solid #ef4444; color: #000;">سجل ${sepLabel}</td>`;
+            titleRow.innerHTML = `<td colspan="${remainingColumnsCount}" style="text-align:center; padding:15px; font-weight:bold; font-size:1.2rem; background:#f9fafb; border-bottom:2px solid #ef4444; color: #000;">${titleHTML}</td>`;
 
             thead.insertBefore(titleRow, thead.firstChild);
             tempTable.appendChild(thead);
@@ -2239,7 +2281,7 @@
                 const image = canvas.toDataURL("image/png");
                 const link = document.createElement('a');
                 link.href = image;
-                link.download = `سجل-${sepLabel}-${new Date().toISOString().slice(0,10)}.png`;
+                link.download = `سجل-${dayName || 'image'}-${new Date().toISOString().slice(0,10)}.png`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -2277,7 +2319,7 @@
             
             let skipMode = false;
             
-            let colSpanCount = 6; 
+            let colSpanCount = 5; // تم تقليل العدد لأننا أزلنا عمود الساعات
             if (targetView === 'reciters' || targetView === 'stages') colSpanCount++; 
             if (isAdmin) colSpanCount++; 
 
@@ -2293,6 +2335,22 @@
                     const docSnap = docs[i];
                     const d = docSnap.data();
                     
+                    // معالجة صف التقرير الكبير (Summary)
+                    if (d.type === 'summary') {
+                         const tr = document.createElement('tr');
+                         tr.className = 'summary-row';
+                         tr.innerHTML = `
+                            <td colspan="${colSpanCount}">
+                                <div class="summary-content">
+                                    <span>📅 ${d.asdText}</span>
+                                    <span class="summary-value">⏰ ${d.asd} ساعة</span>
+                                </div>
+                            </td>
+                         `;
+                         fragment.appendChild(tr);
+                         continue;
+                    }
+
                     if (d.type === 'separator') {
                         if (skipMode) {
                             skipMode = false;
@@ -2336,6 +2394,8 @@
                              const hiddenClass = isCollapsed && count > 0 ? 'has-hidden' : '';
                              const hiddenText = isCollapsed && count > 0 ? `<span class="hidden-count">(${count} مخفية)</span>` : '';
 
+                             const hoursText = d.separatorHours ? `<span class="separator-hours">⏱ ${d.separatorHours} ساعة</span>` : '';
+
                              const tr = document.createElement('tr');
                              tr.className = 'separator-row';
                              tr.setAttribute('data-id', sepId);
@@ -2355,6 +2415,7 @@
                                         <div class="separator-label-container ${hiddenClass}" onclick="toggleCollapse('${docSnap.id}')">
                                             <i class="fas ${arrowIcon}" style="margin-left:5px;"></i>
                                             <span>${d.dayLabel || 'فصل'}</span>
+                                            ${hoursText}
                                             ${hiddenText}
                                         </div>
                                         ${deleteBtnHTML}
@@ -2448,20 +2509,12 @@
                         let displayScore = (scoreVal !== '-') ? scoreVal + '%' : scoreVal;
                         scoreHTML = `<td class="col-score" style="text-align:center; font-weight:bold; color:var(--primary-color);">${displayScore}</td>`;
 
-                        let dutyHoursHTML = '';
-                        if(d.frequency === 'daily' || d.frequency === 'weekly' || d.frequency === 'monthly') {
-                            dutyHoursHTML = `<td style="font-size:0.9rem; text-align:center;">${d.dutyHours || 0}</td>`;
-                        } else {
-                            dutyHoursHTML = `<td></td>`;
-                        }
-
                         let finalActionsHTML = `<td class="col-actions">${actionsHTML}</td>`;
 
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td style="font-weight:bold; font-size:0.9rem;">${d.qwe} ${statusBadge}</td>
                             <td style="font-size:0.9rem;">${displayAmountText}</td>
-                            ${dutyHoursHTML}
                             <td>
                                 <div class="rating-wrapper">
                                     <span class="badge ${badgeClass}">${badgeText}</span>
