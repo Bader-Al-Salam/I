@@ -56,6 +56,9 @@
         .btn-login { background-color: var(--primary-color) !important; color: white !important; border: none !important; }
         .btn-dev-info { color: var(--info) !important; background-color: rgba(59, 130, 246, 0.1) !important; border:1px solid rgba(59, 130, 246, 0.2) !important; }
         .btn-students-mgr { color: var(--success) !important; background-color: rgba(16, 185, 129, 0.1) !important; border:1px solid rgba(16, 185, 129, 0.2) !important; }
+        
+        /* زر إعدادات الساعات */
+        .btn-duty-settings { color: #d97706 !important; background-color: rgba(217, 119, 6, 0.1) !important; border:1px solid rgba(217, 119, 6, 0.2) !important; }
 
         main { max-width: 1200px; margin: 1rem auto; padding: 0 1rem; position: relative; }
 
@@ -80,11 +83,8 @@
             transition: 0.3s;
             z-index: 999;
         }
+        .back-btn:hover{ background:#0c6b49; transform:translateX(-50%) scale(1.05); }
 
-        .back-btn:hover{
-            background:#0c6b49;
-            transform:translateX(-50%) scale(1.05);
-        }
         .section-title { font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin: 2rem 0 1rem 0; border-right: 4px solid var(--primary-color); padding-right: 10px; }
 
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
@@ -177,7 +177,7 @@
         .btn-submit { width: 100%; padding: 0.8rem; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size:1rem; }
 
         /* النماذج */
-        #teacher-panel, #reciters-panel, #stages-panel { display: none; background: var(--card-bg); padding:1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 2rem; border-right:5px solid var(--secondary-color); }
+        #teacher-panel, #reciters-panel, #stages-panel, #report-panel { display: none; background: var(--card-bg); padding:1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 2rem; border-right:5px solid var(--secondary-color); }
         .input-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
@@ -186,7 +186,7 @@
         .stat-label { font-size: 0.85rem; color: var(--text-light); }
 
         .table-container { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; border: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; } 
         th, td { padding: 0.8rem; text-align: right; border-bottom: 1px solid var(--border-color); vertical-align: middle; white-space: nowrap; }
         th { color: var(--text-light); font-weight: 600; }
         tr:hover td { background-color: var(--table-hover); }
@@ -317,7 +317,7 @@
         }
         .separator-delete-btn:hover { background: #EF4444; color: white; }
 
-        /* --- نقطة التصوير (الجديدة) --- */
+        /* --- نقطة التصوير --- */
         .screenshot-dot-container {
             position: absolute;
             left: 10px;
@@ -327,7 +327,6 @@
             display: none; /* مخفية افتراضياً */
         }
 
-        /* إظهار النقاط عند تفعيل الوضع */
         body.screenshot-mode .screenshot-dot-container {
             display: flex;
         }
@@ -335,7 +334,7 @@
         .screenshot-dot {
             width: 24px;
             height: 24px;
-            background-color: #095e80; /* لون بنفسجي */
+            background-color: #095e80; 
             border: 2px solid white;
             border-radius: 50%;
             cursor: pointer;
@@ -357,10 +356,10 @@
         .badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;}
         .badge-excellent { background-color: #D1FAE5; color: #065F46; }
         .badge-good { background-color: #DBEAFE; color: #1E40AF; }
-        .badge-average { background-color: #FEF3C7; color: #92400E; } /* الجديد: متوسط */
+        .badge-average { background-color: #FEF3C7; color: #92400E; } 
         .badge-needs-improvement { background-color: #FEE2E2; color: #991B1B; }
         
-        body.dark-mode .badge-average { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; } /* الجديد: متوسط في الوضع المظلم */
+        body.dark-mode .badge-average { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; } 
         .badge-stage { background-color: #E0F2FE; color: #1E3A8A; } 
 
         .empty-state { text-align: center; padding: 3rem; color: var(--text-light); }
@@ -412,7 +411,7 @@
             padding: 2rem;
             border-radius: var(--radius);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            max-width: 500px; /* أوسع قليلاً للقائمة */
+            max-width: 500px; 
             width: 90%;
             text-align: center;
             position: relative;
@@ -503,14 +502,58 @@
         }
         .btn-delete-small:hover { transform: scale(1.2); }
 
+        /* تنسيقات خاصة بمولد التقارير */
+        .report-student-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            min-height: 40px;
+            padding: 10px;
+            background: var(--input-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .report-tag {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .report-tag i {
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .report-tag i:hover {
+            opacity: 1;
+        }
+        .btn-add-to-report {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .btn-add-to-report:hover {
+            background-color: var(--primary-dark);
+        }
+
         @keyframes popIn {
             from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* --- استجابة الموبايل (تصغير النصوص والأزرار) --- */
+        /* --- استجابة الموبايل --- */
         @media (max-width: 768px) {
-            body { font-size: 14px; } /* تصغير خط الجسم */
+            body { font-size: 14px; } 
             
             .logo { font-size: 1rem; }
             .stat-value { font-size: 1.8rem; }
@@ -519,9 +562,8 @@
             .rating-wrapper { flex-direction: row; justify-content: space-between; width: 100%; }
             .btn-home { display: block; }
             
-            /* تصغير الأزرار */
             .nav-actions button { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
-            .nav-actions button span { display: none; } /* إخفاء النصوص والاكتفاء بالأيقونات */
+            .nav-actions button span { display: none; } 
             .nav-actions button i { margin: 0; font-size: 1.1rem; }
 
             .cards-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 1rem; }
@@ -532,29 +574,24 @@
 
             .tracking-grid { grid-template-columns: 1fr; }
 
-            /* تصغير النماذج والجداول */
-            #teacher-panel, #reciters-panel, #stages-panel { padding: 1rem; margin-bottom: 1.5rem; }
+            #teacher-panel, #reciters-panel, #stages-panel, #report-panel { padding: 1rem; margin-bottom: 1.5rem; }
             .form-group { margin-bottom: 0.6rem; }
             .form-group label { font-size: 0.8rem; margin-bottom: 0.3rem; }
             .form-control { padding: 0.6rem; font-size: 0.9rem; }
             .btn-submit, .btn-cancel-edit { padding: 0.6rem; font-size: 0.9rem; }
             
-            /* تصغير الجدول بشكل كبير */
             th, td { padding: 0.5rem 0.3rem; font-size: 0.75rem; }
             .badge { font-size: 0.65rem; padding: 0.15rem 0.4rem; }
             .btn-delete, .btn-edit { padding: 0.25rem 0.5rem; font-size: 0.7rem; }
             
-            /* الأزرار بعرض كامل في الموبايل */
             .btn-submit, .btn-cancel-edit {
                 width: 100%;
                 margin-top: 5px;
                 margin-left: 0;
             }
             
-            /* تباعد أصغر */
             .section-title { font-size: 1rem; margin: 1.5rem 0 0.8rem 0; }
 
-            /* تعديل عرض حقل الطالب في الموبايل */
             .student-input-wrapper {
                 flex-wrap: wrap;
             }
@@ -571,17 +608,18 @@
                     <i class="fas fa-home"></i> <span>الرئيسية</span>
                 </button>
                 
-                <!-- زر تبديل الوضع المظلم -->
                 <button class="btn-theme" onclick="toggleTheme()" title="تغيير المظهر">
                     <i id="theme-icon" class="fas fa-moon"></i>
                 </button>
 
-                <!-- زر إدارة الطلاب (جديد) -->
+                <button class="btn-duty-settings" onclick="openDutySettings()" title="تحديد ساعات الدوام الافتراضية">
+                    <i class="fas fa-clock"></i> <span>ساعات الدوام</span>
+                </button>
+
                 <button class="btn-students-mgr" onclick="openStudentManager()" title="إدارة قائمة الطلاب">
                     <i class="fas fa-users"></i> <span>الطلاب</span>
                 </button>
 
-                <!-- زر معلومات المطور -->
                 <button class="btn-dev-info" onclick="toggleDevInfo()">
                     <i class="fas fa-user-tie"></i> <span>عن المطور</span>
                 </button>
@@ -612,7 +650,6 @@
                 <p>المدرس معاذ المحمد</p>
             </div>
 
-            <!-- بطاقات جديدة: المتابعة (يومي/أسبوعي/شهري) -->
             <div class="section-title">المتابعة العامة</div>
             <div class="tracking-grid">
                 <div class="tracking-card" onclick="openTracking('daily')">
@@ -629,7 +666,6 @@
                 </div>
             </div>
 
-            <!-- البطاقات القديمة -->
             <div class="section-title">الاختبارات الشاملة</div>
             <div class="cards-grid">
                 <div class="menu-card" onclick="navigateTo('reciters')">
@@ -650,11 +686,10 @@
         <section id="dashboard-view">
             <h2 id="page-title" style="margin-bottom: 1.5rem; font-size: 1.2rem; border-bottom: 2px solid var(--primary-color); display: inline-block; padding-bottom: 5px;">السجلات</h2>
 
-            <!-- نموذج المتابعة -->
+            <!-- نموذج المتابعة اليومية -->
             <section id="teacher-panel">
-                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">تسجيل متابعة جديدة</h3>
+                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">تسجيل متابعة يومية جديدة</h3>
                 <form id="entry-form" onsubmit="handleSubmit(event)">
-                    <!-- حقل اختيار الطالب المعدل -->
                     <div class="form-group">
                         <label>اسم الطالب</label>
                         <div class="student-input-wrapper">
@@ -665,7 +700,6 @@
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
-                        <!-- حقل إضافة طالب جديد -->
                         <div id="new-student-entry" class="new-student-container">
                             <input type="text" id="new-student-name-entry" class="form-control" placeholder="اكتب اسم الطالب الجديد هنا...">
                             <button type="button" class="btn-save-student" onclick="addNewStudent('entry')"><i class="fas fa-check"></i></button>
@@ -673,7 +707,6 @@
                         </div>
                     </div>
                     
-                    <!-- الحقول للمتابعة اليومية والأسبوعية (من، إلى، المجموع) -->
                     <div id="range-inputs" class="input-row">
                         <div class="form-group">
                             <label>من</label>
@@ -689,18 +722,13 @@
                         </div>
                     </div>
 
-                    <!-- الحقل الجديد للمتابعة الشهرية (نص فقط) -->
-                    <div id="monthly-input" class="form-group" style="display:none;">
-                        <label>المجموع</label>
-                        <input type="text" id="monthly-text" class="form-control" placeholder="اكتب الوصف هنا (مثال: تسميع الجزء الأول، مراجعة...)">
-                    </div>
-
-                    <input type="hidden" id="frequency" value="daily">
-
                     <div class="input-row" style="margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>ساعات الدوام</label>
+                            <input type="number" id="duty-hours" class="form-control" placeholder="عدد الساعات" min="0" step="0.5">
+                        </div>
                         <div class="form-group"><label>التقييم</label><select id="level" class="form-control" required><option value="" disabled selected>اختر التقييم...</option><option value="excellent">ممتاز</option><option value="good">جيد</option><option value="average">متوسط</option><option value="needs-improvement">ضعيف</option></select></div>
                         
-                        <!-- حقل الحالة -->
                         <div class="form-group" id="attendance-group">
                             <label>الحالة</label>
                             <select id="attendance" class="form-control">
@@ -708,15 +736,51 @@
                                 <option value="absent">غياب</option>
                             </select>
                         </div>
-                        <div class="form-group" style="margin-top:0px;"><label>الملاحظة</label><input type="text" id="notes" class="form-control" placeholder="ملاحظات اختيارية..."></div>
                     </div>
 
+                    <div class="form-group" style="margin-top:10px;"><label>الملاحظة</label><input type="text" id="notes" class="form-control" placeholder="ملاحظات اختيارية..."></div>
+
+                    <input type="hidden" id="frequency" value="daily">
+
                     <div style="text-align:left; margin-top: 1rem;">
-                        <!-- زر إلغاء التعديل للمتابعة -->
                         <button type="button" id="btn-cancel-entry" class="btn-cancel-edit" onclick="handleCancelEdit()">إلغاء التعديل</button>
                         <button type="submit" id="btn-submit-entry" class="btn-submit" style="width:auto; display:inline-flex; gap:5px; justify-content: center;"><i class="fas fa-cloud-upload-alt"></i> تحديث البيانات</button>
                     </div>
                 </form>
+            </section>
+
+            <!-- نموذج التقارير (الأسبوعي والشهري) -->
+            <section id="report-panel">
+                <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">توليد تقرير جديد وحفظه</h3>
+                <div class="input-row">
+                    <div class="form-group">
+                        <label>تاريخ البداية</label>
+                        <input type="date" id="report-start-date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ النهاية</label>
+                        <input type="date" id="report-end-date" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>تحديد الطلاب</label>
+                    <div class="student-input-wrapper">
+                        <select id="report-student-select" class="form-control student-select">
+                            <option value="" disabled selected>اختر طالباً للإضافة</option>
+                        </select>
+                        <button type="button" class="btn-add-student" onclick="addStudentToReportList()" title="إضافة للقائمة">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="report-selected-list" class="report-student-tags">
+                        <span style="color:var(--text-light); font-size:0.85rem; padding:5px;">لم يتم اختيار طلاب بعد...</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-add-to-report" onclick="generateAndSaveReport()">
+                    <i class="fas fa-file-invoice"></i> حفظ التقرير في السجلات
+                </button>
             </section>
 
             <!-- نموذج المختبرين في الأجزاء -->
@@ -724,7 +788,6 @@
                 <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">إضافة مختبر جديد (أجزاء)</h3>
                 <form id="reciters-form" onsubmit="handleRecitersSubmit(event)">
                     <div class="input-row">
-                        <!-- حقل اختيار الطالب المعدل -->
                         <div class="form-group" style="grid-column: span 2; min-width: 100%;">
                             <label>اسم الطالب</label>
                             <div class="student-input-wrapper">
@@ -735,7 +798,6 @@
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            <!-- حقل إضافة طالب جديد -->
                             <div id="new-student-reciter" class="new-student-container">
                                 <input type="text" id="new-student-name-reciter" class="form-control" placeholder="اسم الطالب الجديد...">
                                 <button type="button" class="btn-save-student" onclick="addNewStudent('reciter')"><i class="fas fa-check"></i></button>
@@ -743,7 +805,6 @@
                             </div>
                         </div>
 
-                        <!-- الحقل المعدل -->
                         <div class="form-group">
                             <label>الجزء</label>
                             <input type="text" id="reciter-amount" class="form-control" placeholder="اكتب اسم الجزء هنا..." required>
@@ -753,7 +814,6 @@
                     </div>
                     <div class="form-group" style="margin-top:10px;"><label>تاريخ الاختبار</label><input type="date" id="reciter-date" class="form-control" required></div>
                     <div style="text-align:left; margin-top: 1rem;">
-                        <!-- زر إلغاء التعديل للمختبرين -->
                         <button type="button" id="btn-cancel-reciter" class="btn-cancel-edit" onclick="handleCancelEdit()">إلغاء التعديل</button>
                         <button type="submit" id="btn-submit-reciter" class="btn-submit" style="width:auto; display:inline-flex; gap:5px; justify-content: center;"><i class="fas fa-save"></i> حفظ المختبر</button>
                     </div>
@@ -765,7 +825,6 @@
                 <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">اختبار مراحل</h3>
                 <form id="stages-form" onsubmit="handleStagesSubmit(event)">
                     <div class="input-row">
-                        <!-- حقل اختيار الطالب المعدل -->
                         <div class="form-group" style="grid-column: span 2; min-width: 100%;">
                             <label>اسم الطالب</label>
                             <div class="student-input-wrapper">
@@ -776,7 +835,6 @@
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                            <!-- حقل إضافة طالب جديد -->
                             <div id="new-student-stage" class="new-student-container">
                                 <input type="text" id="new-student-name-stage" class="form-control" placeholder="اسم الطالب الجديد...">
                                 <button type="button" class="btn-save-student" onclick="addNewStudent('stage')"><i class="fas fa-check"></i></button>
@@ -788,7 +846,6 @@
                             <label>المرحلة</label>
                             <input type="hidden" id="stages-amount" value="1">
                             
-                            <!-- الخيارات المعدلة -->
                             <select id="stages-unit" class="form-control" style="width: 100%;" required>
                                 <option value="" disabled selected>اختر المرحلة</option>
                                 <option value="السدس الأول">السدس الأول</option>
@@ -810,7 +867,6 @@
                     </div>
                     <div class="form-group" style="margin-top:10px;"><label>ملاحظات</label><input type="text" id="stages-notes" class="form-control" placeholder="ملاحظات..."></div>
                     <div style="text-align:left; margin-top: 1rem;">
-                        <!-- زر إلغاء التعديل للمراحل -->
                         <button type="button" id="btn-cancel-stage" class="btn-cancel-edit" onclick="handleCancelEdit()">إلغاء التعديل</button>
                         <button type="submit" id="btn-submit-stage" class="btn-submit" style="width:auto; display:inline-flex; gap:5px; justify-content: center;"><i class="fas fa-award"></i> حفظ المرحلة</button>
                     </div>
@@ -831,13 +887,11 @@
                             <span id="btn-clear-text">مسح الكل</span>
                         </button>
                         
-                        <!-- زر وضع خط الفصل -->
                         <button id="btn-separator" onclick="addSeparatorLine()" class="btn-separator">
                             <i class="fas fa-grip-lines"></i>
                             <span id="sep-text">فصل البيانات</span>
                         </button>
                         
-                        <!-- زر حفظ كصورة (يظهر للمعلم فقط) -->
                         <button id="btn-screenshot" onclick="toggleScreenshotMode()" class="btn-screenshot">
                             <i class="fas fa-camera"></i>
                             <span>صورة</span>
@@ -851,8 +905,9 @@
                             <tr>
                                 <th>الطالب</th>
                                 <th>المقدار</th>
-                                <th id="th-score" class="col-score" style="display:none;">الدرجة من 100%</th>
+                                <th>ساعات الدوام</th>
                                 <th>التقييم</th> 
+                                <th id="th-score" class="col-score" style="display:none;">الدرجة من 100%</th>
                                 <th>ملاحظات</th>
                                 <th>التاريخ</th>
                                 <th id="th-actions" class="col-actions" style="display:none;">إجراءات</th> 
@@ -865,6 +920,24 @@
             </section>
         </section>
     </main>
+
+    <!-- النافذة المنبثقة لإعدادات الساعات -->
+    <div id="duty-settings-modal" class="modal-bg" onclick="if(event.target === this) closeDutySettings()">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeDutySettings()">&times;</button>
+            
+            <div class="dev-avatar" style="background: #d97706;"><i class="fas fa-clock"></i></div>
+            <h3 class="dev-name">إعدادات الدوام</h3>
+            <p class="dev-role">تحديد الساعات الافتراضية للطلاب</p>
+
+            <div class="form-group" style="text-align: right;">
+                <label>عدد الساعات الافتراضية</label>
+                <input type="number" id="default-duty-input" class="form-control" placeholder="مثال: 2.5" min="0" step="0.5">
+            </div>
+
+            <button type="button" class="btn-submit" onclick="saveDutySettings()">حفظ الإعدادات</button>
+        </div>
+    </div>
 
     <!-- النافذة المنبثقة للمطور -->
     <div id="dev-info-modal" class="modal-bg" onclick="if(event.target === this) toggleDevInfo()">
@@ -894,7 +967,7 @@
         </div>
     </div>
 
-    <!-- النافذة المنبثقة لإدارة الطلاب (جديد) -->
+    <!-- النافذة المنبثقة لإدارة الطلاب -->
     <div id="students-manager-modal" class="modal-bg" onclick="if(event.target === this) closeStudentManager()">
         <div class="modal-content">
             <button class="close-modal" onclick="closeStudentManager()">&times;</button>
@@ -904,7 +977,6 @@
             <p class="dev-role">قائمة الطلاب المسجلين في الحلقة</p>
 
             <div class="modal-body-scroll" id="students-list-container">
-                <!-- سيتم توليد القائمة هنا -->
                 <p style="text-align:center; color:var(--text-light);">جاري التحميل...</p>
             </div>
             
@@ -941,13 +1013,35 @@
         let cachedSnapshot = null; 
         let selectedTrackingFreq = 'daily'; 
         let editDocId = null;
-        let allStudents = []; // مصفوفة لتخزين أسماء الطلاب
-        
-        // --- متغير وضع تصوير القسم ---
+        let allStudents = []; 
+        let reportSelectedStudents = [];
+        let defaultDutyHours = localStorage.getItem('defaultDutyHours') || '';
         let isScreenshotMode = false;
-
-        // --- حالة الطي (Collapse) ---
         let collapsedSeparators = JSON.parse(localStorage.getItem('hifz_platform_collapsed') || '{}');
+
+        // --- إعدادات الساعات ---
+        window.openDutySettings = () => {
+            document.getElementById('default-duty-input').value = defaultDutyHours;
+            document.getElementById('duty-settings-modal').style.display = 'flex';
+        }
+
+        window.closeDutySettings = () => {
+            document.getElementById('duty-settings-modal').style.display = 'none';
+        }
+
+        window.saveDutySettings = () => {
+            const val = document.getElementById('default-duty-input').value;
+            defaultDutyHours = val;
+            localStorage.setItem('defaultDutyHours', val);
+            
+            const currentDutyInput = document.getElementById('duty-hours');
+            if(currentDutyInput && currentDutyInput.value === '') {
+                currentDutyInput.value = val;
+            }
+
+            showToast('تم حفظ إعدادات الدوام', 'success');
+            closeDutySettings();
+        }
 
         window.toggleCollapse = (id) => {
             if (collapsedSeparators[id]) {
@@ -959,14 +1053,12 @@
             if (cachedSnapshot) renderTable(cachedSnapshot, currentView);
         };
 
-        // --- تهيئة الوضع المظلم عند التحميل ---
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-mode');
             document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
         }
 
-        // --- تبديل الوضع المظلم ---
         window.toggleTheme = () => {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
@@ -979,30 +1071,24 @@
                 icon.classList.replace('fa-sun', 'fa-moon');
             }
         };
-
-        // --- إدارة الطلاب (Students Management) ---
         
-        // 1. فتح نافذة إدارة الطلاب
         window.openStudentManager = () => {
             renderStudentList();
             const modal = document.getElementById('students-manager-modal');
             modal.style.display = 'flex';
         }
 
-        // 2. إغلاق نافذة إدارة الطلاب
         window.closeStudentManager = () => {
             const modal = document.getElementById('students-manager-modal');
             modal.style.display = 'none';
         }
 
-        // 3. حذف طالب
         window.deleteStudent = async (id, name) => {
-            if(confirm(`هل أنت متأكد من حذف الطالب "${name}"؟\nملاحظة: سيتم إزالته من قائمة الاختيار فقط، ولن يتم حذف سجلاته القديمة.`)) {
+            if(confirm(`هل أنت متأكد من حذف الطالب "${name}"؟`)) {
                 try {
                     await deleteDoc(doc(db, "students", id));
                     showToast('تم حذف الطالب', 'success');
-                    // القائمة ستتحدث تلقائياً عبر listener
-                    renderStudentList(); // إعادة رسم القائمة فوراً
+                    renderStudentList(); 
                 } catch (error) {
                     console.error("Error deleting student: ", error);
                     showToast('فشل الحذف', 'error');
@@ -1010,7 +1096,6 @@
             }
         }
 
-        // 4. رسم قائمة الطلاب داخل النافذة
         function renderStudentList() {
             const container = document.getElementById('students-list-container');
             container.innerHTML = '';
@@ -1033,10 +1118,8 @@
             });
         }
 
-        // 5. الاستماع لتغييرات مجموعة الطلاب (عام)
         function loadStudents() {
             const studentsRef = collection(db, "students");
-            // ترتيب الطلاب أبجدياً
             const q = query(studentsRef, orderBy("name", "asc"));
             
             onSnapshot(q, (snapshot) => {
@@ -1045,7 +1128,6 @@
                     allStudents.push({ id: doc.id, name: doc.data().name });
                 });
                 updateStudentSelects();
-                // تحديث القائمة داخل المودال إذا كانت مفتوحة
                 if(document.getElementById('students-manager-modal').style.display === 'flex') {
                     renderStudentList();
                 }
@@ -1054,17 +1136,17 @@
             });
         }
 
-        // 6. تحديث القوائم المنسدلة في جميع النماذج
         function updateStudentSelects() {
             const selects = [
                 document.getElementById('student-name'),
                 document.getElementById('reciter-name'),
-                document.getElementById('stages-name')
+                document.getElementById('stages-name'),
+                document.getElementById('report-student-select') 
             ];
 
             selects.forEach(select => {
                 if(!select) return;
-                const currentVal = select.value; // حفظ القيمة المختارة حالياً
+                const currentVal = select.value; 
                 select.innerHTML = '<option value="" disabled selected>اختر اسم الطالب</option>';
                 
                 allStudents.forEach(student => {
@@ -1074,14 +1156,12 @@
                     select.appendChild(option);
                 });
 
-                // استعادة القيمة المختارة إذا كانت لا تزال موجودة
                 if (currentVal && allStudents.some(s => s.name === currentVal)) {
                     select.value = currentVal;
                 }
             });
         }
 
-        // 7. إظهار/إخفاء حقل إضافة طالب جديد
         window.toggleNewStudentInput = (formType) => {
             const containerId = `new-student-${formType}`;
             const container = document.getElementById(containerId);
@@ -1098,7 +1178,6 @@
             }
         }
 
-        // 8. حفظ طالب جديد
         window.addNewStudent = async (formType) => {
             const inputId = `new-student-name-${formType}`;
             const input = document.getElementById(inputId);
@@ -1109,10 +1188,8 @@
                 return;
             }
 
-            // التحقق من التكرار (اختياري ولكن مفيد)
             if (allStudents.some(s => s.name === name)) {
                 showToast('الطالب موجود مسبقاً', 'error');
-                // اختيار الطالب الموجود
                 const selectMap = {
                     'entry': 'student-name',
                     'reciter': 'reciter-name',
@@ -1132,8 +1209,6 @@
                 });
                 showToast('تمت إضافة الطالب بنجاح', 'success');
                 
-                // بعد الإضافة، سيقوم loadStudents بتحديث القائمة تلقائياً
-                // نقوم باختيار الطالب الجديد في النموذج الحالي
                 setTimeout(() => {
                     const selectMap = {
                         'entry': 'student-name',
@@ -1143,12 +1218,11 @@
                     const select = document.getElementById(selectMap[formType]);
                     if(select) {
                         select.value = name;
-                        // تحريك بسيط لتأكيد الاختيار
                         select.style.backgroundColor = 'var(--success)';
                         setTimeout(() => select.style.backgroundColor = '', 300);
                     }
                     toggleNewStudentInput(formType);
-                }, 500); // انتظار بسيط لتحديث السناب شوت
+                }, 500); 
 
             } catch (error) {
                 console.error("Error adding student: ", error);
@@ -1156,7 +1230,6 @@
             }
         }
 
-        // --- توليد خيارات الأجزاء الشهرية ---
         const partsSelect = document.getElementById('stages-unit');
         if(partsSelect){
             for(let i=1; i<=30; i++) {
@@ -1167,7 +1240,6 @@
             }
         }
 
-        // دالة فتح/إغلاق نافذة المطور
         window.toggleDevInfo = () => {
             const modal = document.getElementById('dev-info-modal');
             if (modal.style.display === 'flex') {
@@ -1184,52 +1256,44 @@
             amountInput.value = 1; 
         }
 
-        // دالة فتح نوع المتابعة المحدد
         window.openTracking = (freq) => {
             selectedTrackingFreq = freq;
             document.getElementById('frequency').value = freq;
             
-            const attendanceGroup = document.getElementById('attendance-group');
-            const rangeInputs = document.getElementById('range-inputs');
-            const monthlyInput = document.getElementById('monthly-input');
+            const teacherPanel = document.getElementById('teacher-panel');
+            const reportPanel = document.getElementById('report-panel');
             
-            // عناصر الإدخال
-            const fromInput = document.getElementById('amount-from');
-            const toInput = document.getElementById('amount-to');
-            const monthlyTextInput = document.getElementById('monthly-text');
+            teacherPanel.style.display = 'none';
+            reportPanel.style.display = 'none';
 
-            if (freq === 'monthly') {
-                attendanceGroup.style.display = 'none';
-                rangeInputs.style.display = 'none'; // إخفاء حقول من-إلى
-                monthlyInput.style.display = 'block'; // إظهار حقل النص
-                
-                // إزالة التحقق الإجباري من الحقول المخفية (إذا كان موجوداً)
-                fromInput.removeAttribute('required');
-                toInput.removeAttribute('required');
-                // جعل حقل النص إجبارياً
-                monthlyTextInput.setAttribute('required', 'true');
-                monthlyTextInput.placeholder = "اكتب الوصف يا شيخ";
-
-            } else {
-                attendanceGroup.style.display = 'block';
-                rangeInputs.style.display = 'grid'; // إظهار حقول من-إلى
-                monthlyInput.style.display = 'none'; // إخفاء حقل النص
-                
-                // التعديل: عدم جعل الحقول إجبارية (إزالة required)
-                
-                // إزالة التحقق الإجباري من حقل النص
-                monthlyTextInput.removeAttribute('required');
+            if(freq === 'daily') {
+                document.getElementById('duty-hours').value = defaultDutyHours;
             }
 
-            let title = '';
-            if(freq === 'daily') title = 'متابعة يومية';
-            else if(freq === 'weekly') title = 'متابعة أسبوعية';
-            else if(freq === 'monthly') title = 'متابعة شهرية';
-            
-            navigateTo('dashboard', title);
+            const rangeInputs = document.getElementById('range-inputs');
+            const dutyHoursGroup = document.getElementById('duty-hours').parentElement; 
+            const levelGroup = document.getElementById('level').parentElement;
+            const attendanceGroup = document.getElementById('attendance-group');
+            const notesGroup = document.getElementById('notes').parentElement;
+
+            if (freq === 'daily') {
+                teacherPanel.style.display = 'block';
+                rangeInputs.style.display = 'grid';
+                dutyHoursGroup.style.display = 'block';
+                levelGroup.style.display = 'block';
+                attendanceGroup.style.display = 'block';
+                notesGroup.style.display = 'block';
+                
+                navigateTo('dashboard', 'متابعة يومية');
+            } 
+            else if (freq === 'weekly' || freq === 'monthly') {
+                reportPanel.style.display = 'block';
+                
+                let title = freq === 'weekly' ? 'متابعة أسبوعية' : 'متابعة شهرية';
+                navigateTo('dashboard', title);
+            }
         }
 
-        // --- تم التعديل: دالة حساب المجموع (تم حذف الاستثناء الخاص بـ 168-200) ---
         window.calculateTotal = () => {
             const fromVal = document.getElementById('amount-from').value;
             const toVal = document.getElementById('amount-to').value;
@@ -1243,7 +1307,6 @@
             const to = parseFloat(toVal) || 0;
             let total = 0;
 
-            // المعادلة الاعتيادية لجميع الصفحات
             if (to >= from) { 
                 total = (to - from) + 1; 
             }
@@ -1251,14 +1314,132 @@
             document.getElementById('amount-total').value = total;
         }
 
-        // دالة وضع خط الفصل (تم التعديل لإضافة سجل فارغ)
+        window.addStudentToReportList = () => {
+            const select = document.getElementById('report-student-select');
+            const name = select.value;
+            if(!name) return;
+
+            if(!reportSelectedStudents.includes(name)) {
+                reportSelectedStudents.push(name);
+                renderReportStudentsList();
+            }
+            select.value = ""; 
+        }
+
+        window.removeStudentFromReport = (name) => {
+            reportSelectedStudents = reportSelectedStudents.filter(s => s !== name);
+            renderReportStudentsList();
+        }
+
+        function renderReportStudentsList() {
+            const container = document.getElementById('report-selected-list');
+            container.innerHTML = '';
+            
+            if(reportSelectedStudents.length === 0) {
+                container.innerHTML = '<span style="color:var(--text-light); font-size:0.85rem; padding:5px;">لم يتم اختيار طلاب بعد...</span>';
+                return;
+            }
+
+            reportSelectedStudents.forEach(name => {
+                const tag = document.createElement('span');
+                tag.className = 'report-tag';
+                tag.innerHTML = `${name} <i class="fas fa-times" onclick="removeStudentFromReport('${name}')"></i>`;
+                container.appendChild(tag);
+            });
+        }
+
+        // --- التعديل الجوهري: حفظ التقرير كبيانات في قاعدة البيانات ---
+        window.generateAndSaveReport = async () => {
+            const startDateStr = document.getElementById('report-start-date').value;
+            const endDateStr = document.getElementById('report-end-date').value;
+
+            if(!startDateStr || !endDateStr) {
+                showToast('يرجى تحديد تاريخ البداية والنهاية', 'warning');
+                return;
+            }
+            if(reportSelectedStudents.length === 0) {
+                showToast('يرجى اختيار طالب واحد على الأقل', 'warning');
+                return;
+            }
+
+            const startDate = new Date(startDateStr);
+            startDate.setHours(0,0,0,0);
+            const endDate = new Date(endDateStr);
+            endDate.setHours(23,59,59,999);
+
+            const startDateDisplay = new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }).format(startDate);
+            const endDateDisplay = new Intl.DateTimeFormat('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }).format(endDate);
+
+            try {
+                const batch = writeBatch(db);
+                let count = 0;
+
+                // نقوم بحساب البيانات من السجلات اليومية، ولكن نحفظها كسجلات جديدة
+                const dailyRecords = cachedSnapshot.docs.filter(docSnap => {
+                    const d = docSnap.data();
+                    return d.frequency === 'daily' && d.uoi && reportSelectedStudents.includes(d.qwe);
+                });
+
+                // استخدام خريطة لتجميع البيانات لكل طالب
+                const studentStats = {};
+
+                dailyRecords.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const docDate = d.uoi.toDate();
+                    
+                    if (docDate >= startDate && docDate <= endDate) {
+                        if (!studentStats[d.qwe]) {
+                            studentStats[d.qwe] = { pages: 0, hours: 0 };
+                        }
+                        studentStats[d.qwe].pages += (d.asd || 0);
+                        studentStats[d.qwe].hours += (d.dutyHours || 0);
+                    }
+                });
+
+                // الآن نحفظ سجل لكل طالب في التقرير الحالي
+                Object.keys(studentStats).forEach(studentName => {
+                    const stats = studentStats[studentName];
+                    
+                    const newDocRef = doc(collection(db, "daily_records"));
+                    
+                    const dataPayload = {
+                        qwe: studentName,
+                        asd: stats.pages,
+                        asdText: `${stats.pages} صفحة`,
+                        dutyHours: stats.hours,
+                        frequency: selectedTrackingFreq, // 'weekly' أو 'monthly'
+                        unit: "صفحة",
+                        zxc: 'good',
+                        nmk: `تقرير: ${startDateDisplay} - ${endDateDisplay}`,
+                        uoi: serverTimestamp()
+                    };
+
+                    batch.set(newDocRef, dataPayload);
+                    count++;
+                });
+
+                if (count > 0) {
+                    await batch.commit();
+                    showToast(`تم حفظ تقرير ${count} طلاب بنجاح`, 'success');
+                    reportSelectedStudents = [];
+                    renderReportStudentsList();
+                } else {
+                    showToast('لا توجد بيانات يومية لهؤلاء الطلاب في الفترة المحددة', 'info');
+                }
+
+            } catch(err) {
+                console.error(err);
+                showToast('فشل حفظ التقرير', 'error');
+            }
+        }
+
         window.addSeparatorLine = async () => {
             if(!confirm('هل تريد وضع الخط ')) return;
             
             try {
                 const now = new Date();
                 const dayName = now.toLocaleDateString('ar-SY', { weekday: 'long' });
-
+                // التأكد من استخدام التردد الصحيح (يومي، أسبوعي، شهري)
                 let separatorFreq = selectedTrackingFreq; 
                 
                 if (currentView === 'reciters') {
@@ -1295,19 +1476,14 @@
                     studentData.frequency = 'stages';
                 } 
                 else {
+                    // سواء كان يومي، أسبوعي، أو شهري
                     studentData.frequency = separatorFreq;
                     studentData.attr = "present";
                     studentData.nmk = "";
-
-                    if (separatorFreq === 'monthly') {
-                         studentData.asdText = ""; 
-                         studentData.asd = 0;
-                    } else {
-                        studentData.page_from = 0;
-                        studentData.page_to = 0;
-                        studentData.asd = 0;
-                        studentData.asdText = "";
-                    }
+                    studentData.page_from = 0;
+                    studentData.page_to = 0;
+                    studentData.asd = 0;
+                    studentData.asdText = "";
                 }
 
                 await addDoc(collection(db, "daily_records"), studentData);
@@ -1319,7 +1495,6 @@
             }
         }
 
-        // دالة التنقل
         window.navigateTo = (view, customTitle = null) => {
             const homeView = document.getElementById('home-view');
             const dashboardView = document.getElementById('dashboard-view');
@@ -1328,10 +1503,12 @@
             const teacherPanel = document.getElementById('teacher-panel');
             const recitersPanel = document.getElementById('reciters-panel');
             const stagesPanel = document.getElementById('stages-panel');
+            const reportPanel = document.getElementById('report-panel');
             const authSection = document.getElementById('auth-section');
             const clearAllBtn = document.getElementById('btn-clear-all');
             const separatorBtn = document.getElementById('btn-separator');
             const clearAllText = document.getElementById('btn-clear-text');
+            const shotBtn = document.getElementById('btn-screenshot');
             
             if (view !== currentView) {
                 handleCancelEdit(true);
@@ -1346,9 +1523,11 @@
                 dashboardView.style.display = 'none';
                 homeBtn.style.display = 'none';
                 teacherPanel.style.display = 'none';
+                reportPanel.style.display = 'none';
                 recitersPanel.style.display = 'none';
                 stagesPanel.style.display = 'none';
                 separatorBtn.style.display = 'none';
+                resetTableHeaders();
             } else if (view === 'reciters') {
                 homeView.style.display = 'none';
                 dashboardView.style.display = 'block';
@@ -1374,11 +1553,25 @@
                 pageTitle.textContent = customTitle || 'السجلات';
                 clearAllText.textContent = 'مسح الكل';
                 updateFormVisibility(auth.currentUser);
+                
+                // عرض البيانات المحفوظة في قاعدة البيانات
                 updateTableColumns('dashboard'); 
                 if (cachedSnapshot) renderTable(cachedSnapshot, 'dashboard');
             }
             updateClearButtonVisibility();
         };
+
+        function resetTableHeaders() {
+            const headers = document.getElementById('records-table').querySelectorAll('th');
+            headers[0].textContent = "الطالب";
+            headers[1].textContent = "المقدار";
+            headers[2].textContent = "ساعات الدوام";
+            headers[3].textContent = "التقييم";
+            headers[4].style.display = ''; // Score
+            headers[5].textContent = "ملاحظات";
+            headers[6].textContent = "التاريخ";
+            headers[7].style.display = ''; // Actions
+        }
 
         function updateTableColumns(view) {
             const scoreEls = document.querySelectorAll('.col-score');
@@ -1437,10 +1630,12 @@
 
         const updateFormVisibility = (user) => {
             const teacherPanel = document.getElementById('teacher-panel');
+            const reportPanel = document.getElementById('report-panel');
             const recitersPanel = document.getElementById('reciters-panel');
             const stagesPanel = document.getElementById('stages-panel');
             
             teacherPanel.style.display = 'none';
+            reportPanel.style.display = 'none';
             recitersPanel.style.display = 'none';
             stagesPanel.style.display = 'none';
 
@@ -1450,7 +1645,11 @@
                 } else if (currentView === 'stages') {
                     stagesPanel.style.display = 'block';
                 } else if (currentView === 'dashboard') {
-                    teacherPanel.style.display = 'block';
+                    if(selectedTrackingFreq === 'daily') {
+                        teacherPanel.style.display = 'block';
+                    } else {
+                        reportPanel.style.display = 'block';
+                    }
                 }
             }
             updateClearButtonVisibility();
@@ -1467,7 +1666,6 @@
                 userDisplay.style.display = 'inline-block';
                 userDisplay.textContent = `مرحباً`;
                 updateFormVisibility(user);
-                // تحميل الطلاب عند تسجيل الدخول
                 loadStudents();
                 
                 if(document.getElementById('auth-section').style.display === 'block'){
@@ -1563,7 +1761,6 @@
                     document.getElementById('reciter-amount').value = '';
                     document.getElementById('reciter-score').value = '';
                     document.getElementById('reciter-level').value = "";
-                    // إعادة تعيين اسم الطالب
                     document.getElementById('reciter-name').value = "";
                 }
             } catch(err) { showToast('فشل الحفظ', 'error'); }
@@ -1615,14 +1812,12 @@
                     document.getElementById('stages-score').value = "";
                     document.getElementById('stages-notes').value = "";
                     document.getElementById('stages-level').value = "";
-                    // إعادة تعيين اسم الطالب
                     document.getElementById('stages-name').value = "";
                 }
             } catch(err) { showToast('فشل الحفظ', 'error'); }
             btn.innerHTML = old;
         };
 
-        // دالة حفظ المتابعة
         window.handleSubmit = async (e) => {
             e.preventDefault();
             
@@ -1647,72 +1842,60 @@
                 
                 let asdVal = 0;
                 let asdText = "";
+                const dutyHours = document.getElementById('duty-hours').value;
 
-                if (frequency === 'monthly') {
-                    const monthlyTextVal = document.getElementById('monthly-text').value;
-                    asdText = monthlyTextVal;
-                    asdVal = 1; 
+                const from = document.getElementById('amount-from').value;
+                const to = document.getElementById('amount-to').value;
+                const total = document.getElementById('amount-total').value;
+                
+                if (from && to) {
+                    asdVal = parseInt(total) || 0;
+                    asdText = `من ${from} إلى ${to}`;
                 } else {
-                    const from = document.getElementById('amount-from').value;
-                    const to = document.getElementById('amount-to').value;
-                    const total = document.getElementById('amount-total').value;
-                    
-                    if (from && to) {
-                        asdVal = parseInt(total) || 0;
-                        asdText = `من ${from} إلى ${to}`;
-                    } else {
-                        asdVal = parseInt(total) || 0;
-                        asdText = ""; 
-                    }
-
-                    let dataPayload = {
-                        qwe: name,
-                        asd: asdVal, 
-                        asdText: asdText, 
-                        unit: "", 
-                        zxc: level, 
-                        frequency: frequency, 
-                        nmk: document.getElementById('notes').value
-                    };
-
-                    if(frequency !== 'monthly') { 
-                         const fromVal = document.getElementById('amount-from').value;
-                         const toVal = document.getElementById('amount-to').value;
-                         
-                         if(fromVal && toVal) {
-                            dataPayload.page_from = parseInt(fromVal);
-                            dataPayload.page_to = parseInt(toVal);
-                         }
-                    }
-
-                    if (frequency !== 'monthly') {
-                        dataPayload.attr = document.getElementById('attendance').value;
-                    }
-
-                    if (editDocId) {
-                        await updateDoc(doc(db, "daily_records", editDocId), dataPayload);
-                        showToast('تم تحديث البيانات', 'success');
-                        handleCancelEdit();
-                    } else {
-                        dataPayload.uoi = serverTimestamp();
-                        await addDoc(collection(db, "daily_records"), dataPayload);
-                        showToast('تم الحفظ', 'success');
-                        if (frequency === 'monthly') {
-                            document.getElementById('monthly-text').value = "";
-                            document.getElementById('notes').value = "";
-                            document.getElementById('level').value = ""; 
-                        } else {
-                            document.getElementById('amount-from').value = "";
-                            document.getElementById('amount-to').value = "";
-                            document.getElementById('amount-total').value = "";
-                            document.getElementById('notes').value = "";
-                            document.getElementById('attendance').value = 'present';
-                            document.getElementById('level').value = ""; 
-                        }
-                        // إعادة تعيين اسم الطالب
-                        document.getElementById('student-name').value = "";
-                    }
+                    asdVal = parseInt(total) || 0;
+                    asdText = ""; 
                 }
+
+                let dataPayload = {
+                    qwe: name,
+                    asd: asdVal, 
+                    asdText: asdText, 
+                    unit: "", 
+                    zxc: level, 
+                    frequency: frequency, 
+                    nmk: document.getElementById('notes').value,
+                    dutyHours: parseFloat(dutyHours) || 0
+                };
+
+                const fromVal = document.getElementById('amount-from').value;
+                const toVal = document.getElementById('amount-to').value;
+                
+                if(fromVal && toVal) {
+                    dataPayload.page_from = parseInt(fromVal);
+                    dataPayload.page_to = parseInt(toVal);
+                }
+
+                dataPayload.attr = document.getElementById('attendance').value;
+
+                if (editDocId) {
+                    await updateDoc(doc(db, "daily_records", editDocId), dataPayload);
+                    showToast('تم تحديث البيانات', 'success');
+                    handleCancelEdit();
+                } else {
+                    dataPayload.uoi = serverTimestamp();
+                    await addDoc(collection(db, "daily_records"), dataPayload);
+                    showToast('تم الحفظ', 'success');
+                    
+                    document.getElementById('amount-from').value = "";
+                    document.getElementById('amount-to').value = "";
+                    document.getElementById('amount-total').value = "";
+                    document.getElementById('notes').value = "";
+                    document.getElementById('attendance').value = 'present';
+                    document.getElementById('level').value = ""; 
+                    document.getElementById('student-name').value = "";
+                    document.getElementById('duty-hours').value = defaultDutyHours; 
+                }
+
             } catch(err) { showToast('فشل الحفظ', 'error'); }
             btn.innerHTML = old;
         };
@@ -1747,7 +1930,10 @@
                 toggleEditButton('#btn-submit-stage', 'تحديث المرحلة', '#btn-cancel-stage');
             } 
             else {
-                openTracking(data.frequency);
+                // التأكد من الانتقال للوحة الصحيحة
+                if(data.frequency === 'daily') openTracking('daily');
+                else if(data.frequency === 'weekly') openTracking('weekly');
+                else if(data.frequency === 'monthly') openTracking('monthly');
                 
                 document.getElementById('student-name').value = data.qwe;
                 document.getElementById('level').value = data.zxc;
@@ -1755,16 +1941,18 @@
                 
                 if (data.attr) document.getElementById('attendance').value = data.attr;
                 
-                if (data.frequency === 'monthly') {
-                    document.getElementById('monthly-text').value = data.asdText || '';
+                if (data.dutyHours !== undefined) {
+                    document.getElementById('duty-hours').value = data.dutyHours;
                 } else {
-                    if (data.page_from !== undefined && data.page_to !== undefined) {
-                        document.getElementById('amount-from').value = data.page_from;
-                        document.getElementById('amount-to').value = data.page_to;
-                        document.getElementById('amount-total').value = (data.page_to - data.page_from) + 1;
-                    } else if (data.asd) {
-                        document.getElementById('amount-total').value = data.asd;
-                    }
+                    document.getElementById('duty-hours').value = defaultDutyHours;
+                }
+                
+                if (data.page_from !== undefined && data.page_to !== undefined) {
+                    document.getElementById('amount-from').value = data.page_from;
+                    document.getElementById('amount-to').value = data.page_to;
+                    document.getElementById('amount-total').value = (data.page_to - data.page_from) + 1;
+                } else if (data.asd) {
+                    document.getElementById('amount-total').value = data.asd;
                 }
                 
                 toggleEditButton('#btn-submit-entry', 'حفظ التعديلات', '#btn-cancel-entry');
@@ -1786,7 +1974,6 @@
         window.handleCancelEdit = (silent = false) => {
             editDocId = null;
             
-            // تفريغ الحقول
             document.getElementById('student-name').value = "";
             document.getElementById('reciter-name').value = "";
             document.getElementById('stages-name').value = "";
@@ -1794,7 +1981,7 @@
             document.getElementById('amount-from').value = "";
             document.getElementById('amount-to').value = "";
             document.getElementById('amount-total').value = "";
-            document.getElementById('monthly-text').value = "";
+            document.getElementById('duty-hours').value = defaultDutyHours;
             document.getElementById('stages-amount').value = '1';
             document.getElementById('reciter-date').valueAsDate = new Date();
             document.getElementById('notes').value = "";
@@ -1807,12 +1994,6 @@
             
             if(currentView === 'dashboard') {
                 document.getElementById('attendance').value = 'present';
-                if(selectedTrackingFreq === 'monthly') {
-                     document.getElementById('monthly-text').value = "";
-                } else {
-                     document.getElementById('amount-from').value = "";
-                     document.getElementById('amount-to').value = "";
-                }
             }
 
             if(!silent) showToast('تم إلغاء التعديل', 'info');
@@ -1888,6 +2069,7 @@
                     let isVisible = false;
 
                     if (currentView === 'dashboard') {
+                        // المفتاح: استخدام selectedTrackingFreq لضمان فصل اليومي عن الأسبوعي والشهري
                         if (d.frequency === selectedTrackingFreq && d.unit !== 'جزء' && d.frequency !== 'stages') {
                             isVisible = true;
                         }
@@ -1938,7 +2120,6 @@
             }
         };
 
-        // --- التعديل: دالة التقاط صورة (تم حذف التعديل الخاص للصفحات 168-200) ---
         window.captureSection = async (sepId) => {
             if (!isScreenshotMode) return;
 
@@ -2004,18 +2185,13 @@
             rowsToCapture.forEach(row => {
                 const clone = row.cloneNode(true);
                 
-                // إزالة عمود الإجراءات
                 const tdActions = clone.querySelector('.col-actions');
                 if(tdActions) tdActions.remove();
 
-                // إزالة عمود الدرجات
                 if (shouldRemoveScoreCol) {
                     const tdScore = clone.querySelector('.col-score');
                     if(tdScore) tdScore.remove();
                 }
-
-                // --- تم الحذف: كود تعديل النطاق 168 إلى 200 ---
-                // الآن سيتم أخذ البيانات كما هي دون أي تعديل في الأرقام
 
                 Array.from(clone.children).forEach(td => {
                     td.style.backgroundColor = '#ffffff';
@@ -2054,7 +2230,6 @@
                 document.body.removeChild(link);
                 
                 showToast('تم', 'success');
-                
                 toggleScreenshotMode();
 
             } catch (error) {
@@ -2087,9 +2262,11 @@
             
             let skipMode = false;
             
-            let colSpanCount =5;
-            if (targetView === 'reciters' || targetView === 'stages') colSpanCount++;
-            if (isAdmin) colSpanCount++;
+            // حساب colSpan بناءً على الأعمدة الظاهرة
+            // 1:Student, 2:Amount, 3:Hours, 4:Rating, 5:Score, 6:Notes, 7:Date, 8:Actions
+            let colSpanCount = 6; 
+            if (targetView === 'reciters' || targetView === 'stages') colSpanCount++; // +1 Score
+            if (isAdmin) colSpanCount++; // +1 Actions
 
             if(snap.empty) { 
                 empty.style.display='block'; 
@@ -2188,7 +2365,7 @@
                     let isVisible = false;
                     let displayAmountText = "";
                     
-                    if ((d.frequency === 'daily' || d.frequency === 'weekly') && d.asdText) {
+                    if ((d.frequency === 'daily' || d.frequency === 'weekly' || d.frequency === 'monthly') && d.asdText) {
                         const totalNumber = d.asd !== undefined ? d.asd : 0;
                         displayAmountText = `${d.asdText} <span class="total-badge">(${totalNumber})</span>`;
                     } 
@@ -2211,6 +2388,7 @@
                     let badgeText = '';
 
                     if (targetView === 'dashboard') {
+                        // الفلترة تعتمد على selectedTrackingFreq (يومي/أسبوعي/شهري)
                         if (d.frequency === selectedTrackingFreq && d.unit !== 'جزء' && d.frequency !== 'stages') {
                             isVisible = true;
                         }
@@ -2258,18 +2436,26 @@
                         let displayScore = (scoreVal !== '-') ? scoreVal + '%' : scoreVal;
                         scoreHTML = `<td class="col-score" style="text-align:center; font-weight:bold; color:var(--primary-color);">${displayScore}</td>`;
 
+                        let dutyHoursHTML = '';
+                        if(d.frequency === 'daily' || d.frequency === 'weekly' || d.frequency === 'monthly') {
+                            dutyHoursHTML = `<td style="font-size:0.9rem; text-align:center;">${d.dutyHours || 0}</td>`;
+                        } else {
+                            dutyHoursHTML = `<td></td>`;
+                        }
+
                         let finalActionsHTML = `<td class="col-actions">${actionsHTML}</td>`;
 
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td style="font-weight:bold; font-size:0.9rem;">${d.qwe} ${statusBadge}</td>
                             <td style="font-size:0.9rem;">${displayAmountText}</td>
-                            ${scoreHTML}
+                            ${dutyHoursHTML}
                             <td>
                                 <div class="rating-wrapper">
                                     <span class="badge ${badgeClass}">${badgeText}</span>
                                 </div>
                             </td>
+                            ${scoreHTML}
                             <td style="font-size: 0.85rem; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${d.nmk||'-'}</td>
                             <td style="font-size: 0.8rem; color:var(--text-light);">${t}</td>
                             ${finalActionsHTML}
@@ -2290,7 +2476,13 @@
 
         onSnapshot(query(collection(db, "daily_records"), orderBy("uoi", "desc")), (snap) => {
             cachedSnapshot = snap; 
-            renderTable(snap, currentView);
+            if(currentView === 'dashboard') {
+                renderTable(snap, 'dashboard');
+            } else if (currentView === 'reciters') {
+                renderTable(snap, 'reciters');
+            } else if (currentView === 'stages') {
+                renderTable(snap, 'stages');
+            }
         });
 
         function showToast(msg, type) {
