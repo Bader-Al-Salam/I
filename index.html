@@ -1,166 +1,647 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>معهد بدر السلام</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-<style>
-body{
-    font-family:'Cairo',sans-serif;
-    margin:0;
-    background:linear-gradient(180deg,#0e3b2e,#06241c);
-    color:white;
-    text-align:center;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>معهد بدر السلام | تجربة فضائية</title>
+    <!-- استدعاء خطوط عربية فخمة -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&family=Tajawal:wght@300;500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- المتغيرات اللونية الديناميكية --- */
+        :root {
+            /* اللون الافتراضي هو الذهبي */
+            --primary-hue: 45; 
+            --primary-saturation: 80%;
+            --primary-lightness: 50%;
+            
+            --primary-color: hsl(var(--primary-hue), var(--primary-saturation), var(--primary-lightness));
+            --primary-glow: hsla(var(--primary-hue), var(--primary-saturation), var(--primary-lightness), 0.5);
+            --text-main: #ffffff;
+            --text-muted: #a0aec0;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: hsla(var(--primary-hue), var(--primary-saturation), 80%, 0.2);
+        }
 
-/* الهيدر */
-.top-header{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:25px;
-    margin-top:35px;
-    flex-wrap:wrap;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            scroll-behavior: smooth;
+        }
 
-/* الشعار */
-.logo-box{
-    width:180px;
-    height:180px;
-    border-radius:50%;
-    overflow:hidden;
-    border:5px solid #d4af37;
-    background:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    animation:goldGlow 3s infinite alternate;
-}
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #020507; /* لون الفضاء العميق جداً */
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
 
-.logo-box img{
-    width:170px;
-}
+        /* --- خلفية الفضاء التفاعلية --- */
+        #space-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            /* خلفية سوداء داكنة كقاعدة للكانفاس */
+            background: radial-gradient(circle at bottom, #0b1021 0%, #000000 100%);
+        }
 
-/* توهج ذهبي */
-@keyframes goldGlow{
-    from{box-shadow:0 0 10px #d4af37;}
-    to{box-shadow:0 0 40px #ffd700;}
-}
+        /* طبقة ضبابية خفيفة لزيادة العمق */
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
 
-/* اسم الموقع */
-.site-title{
-    font-size:36px;
-    font-weight:bold;
-    color:#f5d06f;
-    min-height:45px; /* للحفاظ على ارتفاع ثابت أثناء ظهور الحروف */
-    white-space:nowrap;
-    overflow:hidden;
-    display:inline-block;
-}
+        /* --- زر تغيير الألوان --- */
+        .theme-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 0 15px var(--primary-glow);
+            transition: transform 0.3s;
+        }
 
-/* البطاقات */
-.container{
-    display:grid;
-    grid-template-columns:repeat(2, 1fr); /* صفين لكل صف */
-    gap:28px;
-    max-width:800px;
-    margin:50px auto;
-    padding:20px;
-}
+        .theme-btn:hover { transform: scale(1.1) rotate(90deg); }
 
-/* البطاقة */
-.card{
-    background:#114a3a;
-    border-radius:18px;
-    border:2px solid #d4af37;
-    text-decoration:none;
-    color:white;
-    overflow:hidden;
-    transition:0.35s;
-    box-shadow:0 6px 20px rgba(0,0,0,0.5);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
+        .theme-icon {
+            width: 24px; height: 24px;
+            background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+            border-radius: 50%;
+        }
 
-/* صورة البطاقة دائرية */
-.card img{
-    width:120px;
-    height:120px;
-    object-fit:cover;
-    border-radius:50%;
-    margin-bottom:10px;
-}
+        /* قائمة الألوان المنبثقة */
+        .palette {
+            position: fixed;
+            bottom: 90px;
+            left: 30px;
+            background: rgba(10, 10, 20, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 999;
+        }
 
-/* النص */
-.card p{
-    padding:0;
-    font-size:18px;
-    font-weight:bold;
-    color:#f3d37a;
-}
+        .palette.active { opacity: 1; visibility: visible; transform: translateY(0); }
 
-/* تأثير الحركة */
-.card:hover{
-    transform:translateY(-8px) scale(1.05);
-    background:#17614c;
-    box-shadow:0 10px 25px rgba(0,0,0,0.7);
-}
-</style>
+        .color-option {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+            position: relative;
+        }
+        
+        .color-option:hover { transform: scale(1.2); }
+        .color-option.selected { border-color: white; transform: scale(1.1); }
+
+        /* --- الهيدر --- */
+        header {
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            margin-bottom: 2rem;
+            perspective: 1000px;
+        }
+
+        /* هالة ضوئية قوية حول الشعار */
+        .logo-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px; height: 320px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            animation: pulseGlow 4s ease-in-out infinite;
+            filter: blur(20px);
+        }
+
+        .logo-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 0 40px var(--primary-glow);
+            transition: 0.5s;
+            animation: floatLogo 6s ease-in-out infinite;
+        }
+
+        h1.site-title {
+            font-family: 'Tajawal', sans-serif;
+            font-size: clamp(2.5rem, 9vw, 5.5rem);
+            font-weight: 800;
+            background: linear-gradient(to bottom, #fff 20%, var(--primary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            position: relative;
+            z-index: 2;
+            letter-spacing: -1px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--primary-color);
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+            opacity: 0.8;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        /* --- البطاقات الزجاجية المحسنة --- */
+        main {
+            padding: 50px 20px 100px;
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 2rem;
+            color: var(--text-main);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px; height: 3px;
+            background: var(--primary-color);
+            margin: 10px auto 0;
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 30px;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: rgba(10, 15, 30, 0.4); /* أغمق قليلاً للتباين مع الفضاء */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.1s ease-out;
+            transform-style: preserve-3d;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(60px);
+        }
+
+        /* لمعة زجاجية */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: 0.6s;
+        }
+        .card:hover::before { left: 150%; }
+
+        .card.active { opacity: 1; transform: translateY(0); }
+
+        .card:hover {
+            border-color: var(--primary-color);
+            background: rgba(20, 30, 50, 0.6);
+            box-shadow: 0 0 30px var(--primary-glow), inset 0 0 10px rgba(255,255,255,0.05);
+        }
+
+        .img-box {
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(45deg, transparent, var(--primary-color), transparent);
+            margin-bottom: 20px;
+            transform: translateZ(30px);
+            transition: 0.4s;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .card:hover .img-box {
+            background: var(--primary-color);
+            transform: translateZ(40px) scale(1.1) rotate(5deg);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .img-box img {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #020507;
+        }
+
+        .card h3 {
+            font-size: 1.2rem; margin-bottom: 5px;
+            color: var(--text-main); transform: translateZ(20px); transition: 0.3s;
+        }
+
+        .card span {
+            font-size: 0.9rem; color: var(--text-muted);
+            transform: translateZ(15px); font-weight: 300;
+        }
+
+        .card:hover h3 { color: #fff; text-shadow: 0 0 10px var(--primary-color); }
+
+        footer {
+            text-align: center; padding: 40px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            color: var(--text-muted);
+            margin-top: 50px;
+            position: relative; z-index: 2;
+        }
+
+        /* Animations */
+        @keyframes pulseGlow { 0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); } }
+        @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); } 40% { transform: translate(-50%, -10px); } 60% { transform: translate(-50%, -5px); } }
+
+        @media (max-width: 768px) {
+            .logo-img { width: 140px; height: 140px; }
+            .card-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            main { padding: 30px 10px; }
+            .theme-btn { bottom: 20px; left: 20px; width: 45px; height: 45px; }
+            .palette { bottom: 75px; left: 20px; }
+        }
+        @media (max-width: 480px) {
+            .card-grid { grid-template-columns: 1fr; max-width: 300px; margin: 0 auto; }
+            .palette { flex-direction: row; flex-wrap: wrap; max-width: 200px; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="top-header">
-    <div class="logo-box">
-        <img src="https://i.postimg.cc/bNqb3yWJ/5866036315810368735-121.jpg">
+    <!-- محرك الفضاء -->
+    <canvas id="space-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <!-- زر تغيير اللون -->
+    <div class="theme-btn" id="themeToggle">
+        <div class="theme-icon"></div>
     </div>
-</div>
+    
+    <div class="palette" id="palette">
+        <!-- الألوان: Hue values -->
+        <div class="color-option" style="background: #d4af37;" data-hue="45" title="ذهبي"></div>
+        <div class="color-option" style="background: #00d4ff;" data-hue="190" title="أزرق سيبراني"></div>
+        <div class="color-option" style="background: #bd00ff;" data-hue="280" title="بنفسجي كوني"></div>
+        <div class="color-option" style="background: #ff4d4d;" data-hue="0" title="أحمر مريخي"></div>
+        <div class="color-option" style="background: #00ff88;" data-hue="150" title="أخضر نيون"></div>
+        <div class="color-option" style="background: #ff0099;" data-hue="330" title="وردي فانتازي"></div>
+    </div>
 
-<!-- النص تحت الشعار -->
-<div class="site-title" id="animatedText">معهد بدر السلام</div>
+    <header>
+        <div class="logo-wrapper">
+            <div class="logo-glow"></div>
+            <img src="https://i.postimg.cc/bNqb3yWJ/5866036315810368735-121.jpg" alt="شعار المعهد" class="logo-img">
+        </div>
+        
+        <h1 class="site-title" id="typewriter"></h1>
+        
+        <div class="scroll-indicator" onclick="document.querySelector('main').scrollIntoView({behavior: 'smooth'})">
+            ▼
+        </div>
+    </header>
 
-<div class="container">
-<a href="Maad.html" class="card"><img src="https://i.postimg.cc/MKQdRKCP/5866036315810368746-121.jpg"><p>المدرس معاذ المحمد</p></a>
-<a href="Awad.html" class="card"><img src="https://i.postimg.cc/kXs9C3CT/5866036315810368745-121.jpg"><p>المدرس عوض فطراوي</p></a>
-<a href="Taha.html" class="card"><img src="https://i.postimg.cc/rFVXQn49/5866036315810368748-121.jpg"><p>المدرس طه المحمد</p></a>
-<a href="Modar.html" class="card"><img src="https://i.postimg.cc/50BTmL2c/5866036315810368747-121.jpg"><p>المدرس مضر الشعار</p></a>
-<a href="Tarage.html" class="card"><img src="https://i.postimg.cc/KvHqBJDP/5866036315810368737-121.jpg"><p>المدرسة تراجي المصطفى</p></a>
-<a href="Tahane.html" class="card"><img src="https://i.postimg.cc/9QNDWq2n/5866036315810368736-121.jpg"><p>المدرسة تهاني</p></a>
-<a href="Marwa.html" class="card"><img src="https://i.postimg.cc/6Q5fPZcT/5866036315810368740-121.jpg"><p>المدرسة مروة المصطفى</p></a>
-<a href="Rawda.html" class="card"><img src="https://i.postimg.cc/8c8WTfRC/5866036315810368744-121.jpg"><p>المدرسة روضة المصطفى</p></a>
-<a href="FatemaF.html" class="card"><img src="https://i.postimg.cc/fy2NxmBp/5866036315810368742-121.jpg"><p>المدرسة فاطمة فطراوي</p></a>
-<a href="FatemaM.html" class="card"><img src="https://i.postimg.cc/NjRntRR6/5866036315810368739-121.jpg"><p>المدرسة فاطمة المحمود</p></a>
-<a href="Aia.html" class="card"><img src="https://i.postimg.cc/6q3s5TBK/5866036315810368743-121.jpg"><p>المدرسة اية الايوب</p></a>
-<a href="Marwazainab.html" class="card"><img src="https://i.postimg.cc/Dzy6JJTH/5866036315810368738-121.jpg"><p>المدرسة مروة المصطفى</p></a>
-<a href="Aliaa.html" class="card"><img src="https://i.postimg.cc/cCsx7sZF/5866036315810368741-121.jpg"><p>المدرسة علياء عبدالقادر</p></a>
-</div>
+    <main>
+       
+        
+        <div class="card-grid">
+            <!-- المدرسين -->
+            <a href="Maad.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/MKQdRKCP/5866036315810368746-121.jpg" alt="معاذ"></div>
+                <h3>المدرس معاذ المحمد</h3>
+            </a>
+            <a href="Awad.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/kXs9C3CT/5866036315810368745-121.jpg" alt="عوض"></div>
+                <h3>المدرس عوض فطراوي</h3>
+            </a>
+            <a href="Taha.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/rFVXQn49/5866036315810368748-121.jpg" alt="طه"></div>
+                <h3>المدرس طه المحمد</h3>
+            </a>
+            <a href="Modar.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/50BTmL2c/5866036315810368747-121.jpg" alt="مضر"></div>
+                <h3>المدرس مضر الشعار</h3>
+            </a>
+            <a href="Tarage.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/KvHqBJDP/5866036315810368737-121.jpg" alt="تراجي"></div>
+                <h3>المدرسة تراجي المصطفى</h3>
+            </a>
+            <a href="Tahane.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/9QNDWq2n/5866036315810368736-121.jpg" alt="تهاني"></div>
+                <h3>المدرسة تهاني</h3>
+            </a>
+            <a href="Marwa.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/6Q5fPZcT/5866036315810368740-121.jpg" alt="مروة"></div>
+                <h3>المدرسة مروة المصطفى</h3>
+            </a>
+            <a href="Rawda.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/8c8WTfRC/5866036315810368744-121.jpg" alt="روضة"></div>
+                <h3>المدرسة روضة المصطفى</h3>
+            </a>
+            <a href="FatemaF.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/fy2NxmBp/5866036315810368742-121.jpg" alt="فاطمة"></div>
+                <h3>المدرسة فاطمة فطراوي</h3>
+            </a>
+            <a href="FatemaM.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/NjRntRR6/5866036315810368739-121.jpg" alt="فاطمة"></div>
+                <h3>المدرسة فاطمة المحمود</h3>
+            </a>
+            <a href="Aia.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/6q3s5TBK/5866036315810368743-121.jpg" alt="اية"></div>
+                <h3>المدرسة اية الايوب</h3>
+            </a>
+            <a href="Marwazainab.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/Dzy6JJTH/5866036315810368738-121.jpg" alt="مروة"></div>
+                <h3>المدرسة مروة المصطفى</h3>
+            </a>
+            <a href="Aliaa.html" class="card tilt-card">
+                <div class="img-box"><img src="https://i.postimg.cc/cCsx7sZF/5866036315810368741-121.jpg" alt="علياء"></div>
+                <h3>المدرسة علياء عبدالقادر</h3>
+            </a>
+        </div>
+    </main>
 
-<script>
-// تأثير تركيب الحروف حرفا حرفا
-const textElement = document.getElementById('animatedText');
-const text = textElement.textContent;
-textElement.textContent = '';
+    <footer>
+        <p>جميع الحقوق محفوظة &copy; <span style="color: var(--primary-color);">معهد بدر السلام</span> 2026</p>
+        <p style="font-size: 0.8rem; opacity: 0.6; margin-top:5px;">Deep Space Edition</p>
+    </footer>
 
-let index = 0;
+    <script>
+        // --- 1. نظام إدارة الألوان ---
+        const root = document.documentElement;
+        const themeBtn = document.getElementById('themeToggle');
+        const palette = document.getElementById('palette');
+        const colorOptions = document.querySelectorAll('.color-option');
 
-function typeEffect() {
-    if (index < text.length) {
-        textElement.textContent += text.charAt(index);
-        index++;
-        setTimeout(typeEffect, 150); 
-    } else {
-        setTimeout(() => {
-            textElement.textContent = '';
-            index = 0;
-            typeEffect();
-        }, 2000);
-    }
-}
+        // فتح/إغلاق القائمة
+        themeBtn.addEventListener('click', () => palette.classList.toggle('active'));
 
-typeEffect();
-</script>
+        // تغيير اللون
+        colorOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                const hue = e.target.getAttribute('data-hue');
+                root.style.setProperty('--primary-hue', hue);
+                
+                // إزالة التحديد السابق وإضافته للعنصر الحالي
+                colorOptions.forEach(c => c.classList.remove('selected'));
+                e.target.classList.add('selected');
+                
+                // إعادة إنشاء خلفية الكواكب لتتوافق مع اللون الجديد
+                initSpaceBackground();
+            });
+        });
 
+        // --- 2. تأثير الكتابة ---
+        const title = "معهد بدر السلام";
+        const titleEl = document.getElementById('typewriter');
+        let i = 0;
+        function typeWriter() {
+            if (i < title.length) {
+                titleEl.innerHTML += title.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+        window.addEventListener('load', typeWriter);
+
+        // --- 3. تأثير Tilt للبطاقات ---
+        const cards = document.querySelectorAll('.tilt-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('active'), index * 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        cards.forEach(card => observer.observe(card));
+
+        // --- 4. محرك الفضاء المتقدم (Space Engine) ---
+        const canvas = document.getElementById('space-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let stars = [], planets = [], nebulas = [];
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initSpaceBackground();
+        }
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - width / 2) * 0.05;
+            mouseY = (e.clientY - height / 2) * 0.05;
+        });
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 1.5;
+                this.speed = Math.random() * 0.2 + 0.05;
+                this.alpha = Math.random();
+                this.twinkle = Math.random() * 0.02;
+            }
+            update() {
+                this.y += this.speed;
+                if (this.y > height) this.y = 0;
+                this.alpha += this.twinkle;
+                if (this.alpha > 1 || this.alpha < 0.2) this.twinkle = -this.twinkle;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x + mouseX * 0.5, this.y + mouseY * 0.5, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        class Planet {
+            constructor(isBig) {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = isBig ? Math.random() * 80 + 40 : Math.random() * 20 + 10;
+                this.speedX = (Math.random() - 0.5) * 0.1;
+                this.speedY = (Math.random() - 0.5) * 0.1;
+                this.color = getComputedStyle(root).getPropertyValue('--primary-color').trim();
+                this.angle = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.angle += 0.005;
+                if (this.x > width + 100) this.x = -100;
+                if (this.x < -100) this.x = width + 100;
+                if (this.y > height + 100) this.y = -100;
+                if (this.y < -100) this.y = height + 100;
+                // تحديث اللون الحالي ديناميكياً
+                this.color = getComputedStyle(root).getPropertyValue('--primary-color').trim();
+            }
+            draw() {
+                const pX = this.x - mouseX * 2; // Parallax depth
+                const pY = this.y - mouseY * 2;
+
+                // رسم الكوكب باستخدام تدرج لوني لمحاكاة الإضاءة (3D Effect)
+                const grad = ctx.createRadialGradient(pX - this.size/3, pY - this.size/3, this.size/10, pX, pY, this.size);
+                grad.addColorStop(0, '#fff'); // لمعة قوية
+                grad.addColorStop(0.2, this.color); // اللون الأساسي
+                grad.addColorStop(1, '#000'); // الظلام في الجانب الآخر
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(pX, pY, this.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // رسم حلقة للكوكب الكبير أحياناً
+                if (this.size > 50) {
+                    ctx.strokeStyle = this.color;
+                    ctx.globalAlpha = 0.4;
+                    ctx.lineWidth = this.size * 0.1;
+                    ctx.beginPath();
+                    ctx.ellipse(pX, pY, this.size * 1.8, this.size * 0.4, this.angle, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
+
+        class Nebula {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.radius = Math.random() * 300 + 200;
+            }
+            draw() {
+                const grad = ctx.createRadialGradient(this.x - mouseX, this.y - mouseY, 0, this.x - mouseX, this.y - mouseY, this.radius);
+                const color = getComputedStyle(root).getPropertyValue('--primary-color').trim();
+                grad.addColorStop(0, color.replace(')', ', 0.1)')); // شفافية عالية جداً
+                grad.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, width, height);
+            }
+        }
+
+        function initSpaceBackground() {
+            stars = []; planets = []; nebulas = [];
+            // إنشاء النجوم
+            for(let i=0; i<200; i++) stars.push(new Star());
+            // إنشاء مجرات خلفية
+            for(let i=0; i<3; i++) nebulas.push(new Nebula());
+            // إنشاء كواكب
+            for(let i=0; i<5; i++) planets.push(new Planet(true)); // كواكب كبيرة
+            for(let i=0; i<15; i++) planets.push(new Planet(false)); // كواكب صغيرة
+        }
+
+        function animateSpace() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // رسم المجرات (الطبقة الخلفية)
+            nebulas.forEach(n => n.draw());
+
+            // رسم النجوم (الطبقة الوسطى)
+            stars.forEach(s => { s.update(); s.draw(); });
+
+            // رسم الكواكب (الطبقة الأمامية)
+            planets.forEach(p => { p.update(); p.draw(); });
+
+            requestAnimationFrame(animateSpace);
+        }
+
+        // بدء النظام
+        resize();
+        animateSpace();
+        // تحديد اللون الافتراضي في القائمة
+        document.querySelector('.color-option[data-hue="45"]').classList.add('selected');
+
+    </script>
 </body>
 </html>
