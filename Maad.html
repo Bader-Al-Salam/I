@@ -271,6 +271,10 @@
         .screenshot-dot { width: 25px; height: 25px; background-color: var(--primary-color); border: 2px solid var(--gold-color); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--gold-color); font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .screenshot-dot:hover { transform: scale(1.2); background-color: var(--gold-color); color: var(--primary-color); }
 
+        /* --- التعديل: إخفاء أزرار الحذف عند ظهور الكاميرا --- */
+        body.screenshot-mode .btn-delete-report { display: none !important; }
+        body.screenshot-mode .separator-delete-btn { display: none !important; }
+
         .rating-wrapper { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
         
         .badge { padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; white-space: nowrap;}
@@ -332,18 +336,36 @@
             margin-bottom: 2px;
             box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
             position: relative; /* مهم لتحديد موضع الكاميرا */
+            transition: background-color 0.2s;
         }
+        .report-header-bar:hover { background-color: #f3f4f6; }
         body.dark-mode .report-header-bar { background: var(--card-bg); color: var(--text-main); border-color: var(--gold-color); }
-        .report-title-text { font-weight: 800; font-size: 0.85rem; flex: 1; text-align: center; color: var(--primary-color); }
+        body.dark-mode .report-header-bar:hover { background-color: #064e3b; }
+        
+        /* تعديل: إزالة المؤشر للشريط غير القابل للطي */
+        .report-header-bar.no-collapse { cursor: default; }
+
+        .report-title-text { font-weight: 800; font-size: 0.85rem; flex: 1; text-align: center; color: var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 5px; }
         .report-info-group { display: flex; gap: 5px; align-items: center; justify-content: center; flex-wrap: wrap; }
         .report-badge { background-color: var(--primary-color); color: #fff; padding: 2px 8px; border-radius: 12px; font-weight: bold; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; white-space: nowrap; border: 1px solid var(--gold-color); }
         .report-badge.pages { background-color: var(--secondary-color); border-color: var(--text-light); }
         
+        /* أيقونة الطي */
+        .chevron-toggle {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+            color: var(--gold-color);
+        }
+        .chevron-toggle.rotated {
+            transform: rotate(-90deg);
+        }
+
         .btn-delete-report {
             background: none; border: none; color: var(--danger);
             cursor: pointer; padding: 4px; font-size: 0.9rem;
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s;
+            z-index: 10; /* لضمان أن يكون فوق الشريط عند النقر */
         }
         .btn-delete-report:hover { transform: scale(1.2); }
 
@@ -384,7 +406,7 @@
         <section id="home-view">
             <div class="welcome-hero">
                 <h1>مرحباً بكم في حلقة سيدنا علي بن أبي طالب</h1>
-                <p>المدرس معاذ المحمد</p>
+                <p>المعلم معاذ المحمد</p>
             </div>
 
             <div class="section-title">المتابعة العامة</div>
@@ -664,7 +686,6 @@
 
         window.openDutySettings = () => {
             if (!auth.currentUser) return showToast('يجب تسجيل الدخول', 'warning');
-            // استدعاء النافذة لتحديد الساعات
             document.getElementById('default-duty-input').value = todayTotalHours > 0 ? todayTotalHours : '';
             document.getElementById('duty-settings-modal').style.display = 'flex';
         }
@@ -852,7 +873,6 @@
             }
         };
 
-        // --- تم تعديل هذه الدالة لجمع الساعات التاريخية ---
         window.generateAndSaveReport = async () => {
             const startDateStr = document.getElementById('report-start-date').value;
             const endDateStr = document.getElementById('report-end-date').value;
@@ -876,24 +896,20 @@
                 const batch = writeBatch(db);
                 let count = 0;
                 let grandTotalPages = 0;
-                let totalPeriodHours = 0; // سيتم جمع الساعات الفعلية
+                let totalPeriodHours = 0; 
 
-                // 1. حساب الساعات التاريخية بناءً على الفواصل الموجودة في قاعدة البيانات
                 if (cachedSnapshot) {
                     cachedSnapshot.forEach(docSnap => {
                         const d = docSnap.data();
-                        // إذا كان السجل فاصلاً وتاريخه ضمن المدة المحددة
                         if (d.type === 'separator' && d.uoi && d.uoi >= startDate && d.uoi <= endDate) {
                             totalPeriodHours += (d.separatorHours || 0);
                         }
                     });
                 }
 
-                // 2. حساب صفحات الطلاب في نفس الفترة
                 const studentStats = {};
                 cachedSnapshot.docs.forEach(docSnap => {
                     const d = docSnap.data();
-                    // نجمع فقط السجلات اليومية العادية (ليست فواصل أو ملخصات)
                     if (d.frequency === 'daily' && !d.type && d.uoi && d.uoi >= startDate && d.uoi <= endDate) {
                         const studentName = d.qwe;
                         if (!studentName || studentName.trim() === '' || !allStudents.some(s => s.name === studentName)) return;
@@ -925,7 +941,6 @@
                     count++;
                 });
 
-                // إنشاء سجل الملخص
                 if (count > 0 || totalPeriodHours > 0) {
                     const summaryRef = doc(collection(db, "daily_records"));
                     const futureTime = new Date();
@@ -934,7 +949,7 @@
                     batch.set(summaryRef, {
                         type: 'summary',
                         qwe: reportTitle,
-                        asd: totalPeriodHours, // الساعات التاريخية المحسوبة
+                        asd: totalPeriodHours, 
                         asdText: `${totalPeriodHours} ساعة`,
                         totalPages: grandTotalPages,
                         frequency: selectedTrackingFreq, 
@@ -959,7 +974,6 @@
         window.addSeparatorLine = async () => {
             if(!auth.currentUser) return showToast('يجب تسجيل الدخول', 'warning');
             if(todayTotalHours === 0) {
-                 // طلب تحديد الساعات إذا لم يتم تحديدها مسبقاً
                  openDutySettings();
                  return; 
             }
@@ -971,7 +985,6 @@
                 if (currentView === 'reciters') separatorFreq = 'reciters';
                 else if (currentView === 'stages') separatorFreq = 'stages';
 
-                // حفظ الساعات مع الفاصل
                 await addDoc(collection(db, "daily_records"), {
                     type: 'separator', 
                     frequency: separatorFreq, 
@@ -1039,8 +1052,6 @@
             const display = isAdmin ? 'flex' : 'none';
             document.getElementById('btn-clear-all').style.display = display;
             
-            // --- تصليح زر الكاميرا ---
-            // إظهاره دائماً للمسجل بغض النظر عن العرض الفرعي
             if(isAdmin) {
                 document.getElementById('btn-screenshot').style.display = 'flex';
             } else {
@@ -1194,11 +1205,38 @@
             if(!silent) showToast('تم الإلغاء', 'info');
         }
         window.handleDelete = async (id) => { if(confirm('حذف السجل؟')) { try { await deleteDoc(doc(db, "daily_records", id)); if(editDocId === id) handleCancelEdit(); showToast('تم الحذف', 'success'); } catch { showToast('فشل الحذف', 'error'); } } };
+
         window.handleDeleteSummary = async (id) => {
-            if(confirm('هل أنت متأكد من حذف هذا التقرير؟')) {
+            if(confirm('هل أنت متأكد من حذف هذا التقرير وجميع البيانات التابعة له؟')) {
                 try {
-                    await deleteDoc(doc(db, "daily_records", id));
-                    showToast('تم حذف التقرير', 'success');
+                    if(!cachedSnapshot) return;
+                    const docs = cachedSnapshot.docs;
+                    let sepIndex = -1;
+                    for(let i=0; i<docs.length; i++) {
+                        if(docs[i].id === id) {
+                            sepIndex = i;
+                            break;
+                        }
+                    }
+                    if(sepIndex === -1) return;
+
+                    const batch = writeBatch(db);
+                    let count = 0;
+                    
+                    batch.delete(docs[sepIndex].ref);
+                    count++;
+
+                    for(let i = sepIndex + 1; i < docs.length; i++) {
+                        const d = docs[i].data();
+                        if(d.type === 'separator' || d.type === 'summary') break;
+                        
+                        batch.delete(docs[i].ref);
+                        count++;
+                    }
+
+                    await batch.commit();
+                    showToast(`تم حذف التقرير و ${count-1} سجل`, 'success');
+                    
                     if(currentFilterGroupId) {
                         document.getElementById('report-search-date').value = '';
                         currentFilterGroupId = null;
@@ -1211,7 +1249,39 @@
                 }
             }
         };
-        window.handleDeleteSection = async (sepId) => { if (!confirm('حذف الخط والبيانات؟')) return; try { const docs = cachedSnapshot.docs; let sepIndex = -1; for(let i=0; i<docs.length; i++) { if(docs[i].id === sepId) { sepIndex = i; break; } } if(sepIndex === -1) return; const batch = writeBatch(db); let count = 0; batch.delete(docs[sepIndex].ref); count++; for(let i = sepIndex + 1; i < docs.length; i++) { const d = docs[i].data(); if(d.type === 'separator') break; batch.delete(docs[i].ref); count++; } await batch.commit(); showToast(`تم حذف ${count} سجلات`, 'success'); if(editDocId && count > 0) handleCancelEdit(true); } catch { showToast('فشل الحذف', 'error'); } };
+
+        window.handleDeleteSection = async (sepId) => { 
+            if (!confirm('حذف الخط والبيانات؟')) return; 
+            try { 
+                const docs = cachedSnapshot.docs; 
+                let sepIndex = -1; 
+                for(let i=0; i<docs.length; i++) { 
+                    if(docs[i].id === sepId) { 
+                        sepIndex = i; 
+                        break; 
+                    } 
+                } 
+                if(sepIndex === -1) return; 
+                
+                const batch = writeBatch(db); 
+                let count = 0; 
+                
+                batch.delete(docs[sepIndex].ref); 
+                count++; 
+                
+                for(let i = sepIndex + 1; i < docs.length; i++) { 
+                    const d = docs[i].data(); 
+                    if(d.type === 'separator' || d.type === 'summary') break; 
+                    
+                    batch.delete(docs[i].ref); 
+                    count++; 
+                } 
+                
+                await batch.commit(); 
+                showToast(`تم حذف ${count} سجلات`, 'success'); 
+                if(editDocId && count > 0) handleCancelEdit(true); 
+            } catch { showToast('فشل الحذف', 'error'); } 
+        };
 
         window.handleClearAll = async () => { 
             if (!confirm('مسح كل البيانات الظاهرة؟')) return;
@@ -1219,7 +1289,6 @@
             
             const batch = writeBatch(db);
             let count = 0;
-            const now = new Date();
 
             cachedSnapshot.forEach(docSnap => { 
                 const d = docSnap.data(); 
@@ -1267,7 +1336,6 @@
             if (separatorIndex === -1) return showToast('لم يتم العثور', 'error');
             let rowsToCapture = [];
             for (let i = separatorIndex; i < allRows.length; i++) {
-                // ايقاف عند أول فاصل أو ملخص (Summary) بعد البداية
                 if (allRows[i].classList.contains('separator-row') || allRows[i].classList.contains('summary-row')) { 
                     if (i !== separatorIndex) break; 
                 }
@@ -1302,7 +1370,10 @@
             if(snap.empty) { empty.style.display='block'; table.style.display='none'; } else {
                 empty.style.display='none'; table.style.display='table';
                 const docs = snap.docs;
-                let foundFirstSeparator = false; // لتتبع أول خط فاصل (الأحدث)
+                let foundFirstSeparator = false; 
+                
+                // --- إضافة متتبع لتحديد أحدث تقرير ---
+                let foundLatestReport = false;
 
                 for (let i =0; i < docs.length; i++) {
                     const docSnap = docs[i]; const d = docSnap.data();
@@ -1311,16 +1382,32 @@
                         continue;
                     }
 
-                    // --- إصلاح: إضافة زر الكاميرا للتقارير (Summary Rows) ---
+                    // --- منطق عرض التقرير الملخص ---
                     if (d.type === 'summary') {
                         if (targetView !== 'dashboard' || d.frequency !== selectedTrackingFreq) continue;
+                        
+                        // هل هذا التقرير هو الأحدث؟
+                        const isLatestReport = !foundLatestReport;
+                        if (isLatestReport) {
+                            foundLatestReport = true; // تمييز أننا وجدنا أحدث تقرير
+                        }
+                        
+                        // إذا كان أحدث تقرير، نمنع الطي
+                        let isCollapsed = false;
+                        if (!isLatestReport) {
+                            // للتقارير القديمة فقط نتحقق من الحالة المحفوظة
+                            isCollapsed = !!collapsedSeparators[docSnap.id];
+                        }
+
+                        // تطبيق منطق الطي للبيانات التالية
+                        skipMode = isCollapsed;
+
                         const tr = document.createElement('tr'); tr.className = 'summary-row'; tr.setAttribute('data-id', docSnap.id);
                         
-                        const deleteBtn = isAdmin ? `<button class="btn-delete-report" onclick="handleDeleteSummary('${docSnap.id}')" title="حذف التقرير"><i class="fas fa-trash"></i></button>` : '';
+                        const deleteBtn = isAdmin ? `<button class="btn-delete-report" onclick="event.stopPropagation(); handleDeleteSummary('${docSnap.id}')" title="حذف التقرير والبيانات"><i class="fas fa-trash"></i></button>` : '';
                         
-                        // إنشاء كود نقطة الكاميرا
                         const dotHTML = `
-                            <div class="screenshot-dot-container">
+                            <div class="screenshot-dot-container" onclick="event.stopPropagation();">
                                 <div class="screenshot-dot" onclick="captureSection('${docSnap.id}')" title="تصوير هذا التقرير">
                                     <i class="fas fa-camera"></i>
                                 </div>
@@ -1329,8 +1416,38 @@
 
                         const pagesBadge = d.totalPages ? `<div class="report-badge pages"><i class="fas fa-file-alt"></i> ${d.totalPages} صفحة</div>` : '';
                         const hoursBadge = `<div class="report-badge"><i class="fas fa-clock"></i> ${d.asdText}</div>`;
-                        // إضافة النقطة داخل الشريط
-                        tr.innerHTML = `<td colspan="${colSpanCount}"><div class="report-header-bar">${dotHTML}<div class="report-title-text">${d.qwe}</div><div class="report-info-group">${pagesBadge}${hoursBadge}</div>${deleteBtn}</div></td>`;
+                        
+                        // تحديد واجهة المستخدم حسب نوع التقرير
+                        let chevronHTML = '';
+                        let headerClass = 'report-header-bar';
+                        let clickAttr = '';
+
+                        if (isLatestReport) {
+                            // أحدث تقرير: لا سهم، لا نقر
+                            chevronHTML = `<i class="fas fa-lock" style="font-size:0.7rem; margin-left:5px; color:var(--gold-color);" title="التقرير الحالي مفتوح دائماً"></i>`;
+                            headerClass += ' no-collapse';
+                            clickAttr = '';
+                        } else {
+                            // تقرير قديم: سهم + نقر
+                            const chevronClass = isCollapsed ? 'fa-chevron-left' : 'fa-chevron-down';
+                            const chevronRotateClass = isCollapsed ? 'rotated' : '';
+                            chevronHTML = `<i class="fas fa-chevron-down chevron-toggle ${chevronRotateClass}"></i>`;
+                            clickAttr = `onclick="toggleCollapse('${docSnap.id}')"`;
+                        }
+
+                        const headerContent = `
+                            <div class="${headerClass}" ${clickAttr}>
+                                ${dotHTML}
+                                <div class="report-title-text">
+                                    ${chevronHTML}
+                                    ${d.qwe}
+                                </div>
+                                <div class="report-info-group">${pagesBadge}${hoursBadge}</div>
+                                ${deleteBtn}
+                            </div>
+                        `;
+                        
+                        tr.innerHTML = `<td colspan="${colSpanCount}">${headerContent}</td>`;
                         fragment.appendChild(tr);
                         continue;
                     }
@@ -1355,16 +1472,18 @@
                              }
 
                              const isCollapsed = !!collapsedSeparators[sepId];
+                             if(isCollapsed) skipMode = true;
+
                              let hasNextSeparator = false; 
                              if (isCollapsed) { 
                                  for (let j = i + 1; j < docs.length; j++) { 
-                                     if (docs[j].data().type === 'separator') { hasNextSeparator = true; break; } 
+                                     if (docs[j].data().type === 'separator' || docs[j].data().type === 'summary') { hasNextSeparator = true; break; } 
                                  } 
                              }
                              let count =0; 
                              if (isCollapsed) { 
                                  for (let j = i + 1; j < docs.length; j++) { 
-                                     if (docs[j].data().type === 'separator') break; count++; 
+                                     if (docs[j].data().type === 'separator' || docs[j].data().type === 'summary') break; count++; 
                                  } 
                              }
                              
@@ -1387,7 +1506,9 @@
                         }
                         continue;
                     }
+                    
                     if (skipMode) continue;
+
                     const docDate = d.uoi ? d.uoi.toDate() : null; let isVisible = false; let displayAmountText = "";
                     if ((d.frequency === 'daily' || d.frequency === 'weekly' || d.frequency === 'monthly') && d.asdText) { const totalNumber = d.asd !== undefined ? d.asd : 0; displayAmountText = `${d.asdText} <span class="total-badge">(${totalNumber})</span>`; } else if (d.asdText) { displayAmountText = d.asdText; } else if (d.asd || d.unit) { displayAmountText = `${d.asd || ''} ${d.unit || ''}`.trim(); } else { displayAmountText = d.unit || ''; }
                     let statusBadge = ''; if (d.attr === 'absent') statusBadge = `<span class="badge badge-needs-improvement" style="margin-right:3px;">غائب</span>`;
