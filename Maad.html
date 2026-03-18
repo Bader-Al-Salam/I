@@ -1277,13 +1277,36 @@
             }
         };
 
-        // --- الدالة المعدلة: حذف خط الفصل فقط ---
         window.handleDeleteSection = async (sepId) => { 
-            if (!confirm('هل أنت متأكد من حذف خط الفصل؟')) return; 
+            if (!confirm('حذف الخط والبيانات؟')) return; 
             try { 
-                // حذف السطر فقط دون التأثير على البيانات التي بعده
-                await deleteDoc(doc(db, "daily_records", sepId)); 
-                showToast('تم حذف خط الفصل', 'success'); 
+                const docs = cachedSnapshot.docs; 
+                let sepIndex = -1; 
+                for(let i=0; i<docs.length; i++) { 
+                    if(docs[i].id === sepId) { 
+                        sepIndex = i; 
+                        break; 
+                    } 
+                } 
+                if(sepIndex === -1) return; 
+                
+                const batch = writeBatch(db); 
+                let count = 0; 
+                
+                batch.delete(docs[sepIndex].ref); 
+                count++; 
+                
+                for(let i = sepIndex + 1; i < docs.length; i++) { 
+                    const d = docs[i].data(); 
+                    if(d.type === 'separator' || d.type === 'summary') break; 
+                    
+                    batch.delete(docs[i].ref); 
+                    count++; 
+                } 
+                
+                await batch.commit(); 
+                showToast(`تم حذف ${count} سجلات`, 'success'); 
+                if(editDocId && count > 0) handleCancelEdit(true); 
             } catch { showToast('فشل الحذف', 'error'); } 
         };
 
@@ -1333,11 +1356,13 @@
             else { btn.classList.remove('active'); btn.innerHTML = '<i class="fas fa-camera"></i> <span>صورة</span>'; body.classList.remove('screenshot-mode'); }
         };
 
+        // --- UPDATED CAPTURE FUNCTION (HIDE HEADERS FOR WEEKLY/MONTHLY) ---
         window.captureSection = async (sepId) => {
             if (!isScreenshotMode) return;
             const allRows = Array.from(document.querySelectorAll('#records-body tr'));
             const separatorIndex = allRows.findIndex(row => row.getAttribute('data-id') == sepId);
             if (separatorIndex === -1) return showToast('لم يتم العثور', 'error');
+            
             let rowsToCapture = [];
             for (let i = separatorIndex; i < allRows.length; i++) {
                 if (allRows[i].classList.contains('separator-row') || allRows[i].classList.contains('summary-row')) { 
@@ -1347,20 +1372,134 @@
             }
             if (rowsToCapture.length === 0) return showToast('لا توجد بيانات', 'warning');
             showToast('جاري الالتقاط...', 'info');
-            const tempTable = document.createElement('table'); tempTable.style.width = '100%'; tempTable.style.borderCollapse = 'collapse'; tempTable.style.backgroundColor = '#ffffff';
-            const thead = document.querySelector('#records-table thead').cloneNode(true);
-            if(thead.querySelector('.col-actions')) thead.querySelector('.col-actions').remove();
-            if(thead.querySelector('.col-score') && thead.querySelector('.col-score').style.display === 'none') thead.querySelector('.col-score').remove();
-            Array.from(thead.querySelectorAll('th')).forEach(th => { th.style.backgroundColor = '#064e3b'; th.style.color = '#ffffff'; th.style.borderBottom = '2px solid #D4AF37'; });
+
+            // --- GENERATE CUSTOM HEADER BASED ON TYPE ---
+            let headerHTML = '';
+            const targetRow = rowsToCapture[0];
+            const docId = targetRow.getAttribute('data-id');
+            const docData = cachedSnapshot.docs.find(d => d.id === docId)?.data();
+
+            if (docData) {
+                // Daily Separator Header
+                if (docData.type === 'separator' && docData.frequency === 'daily') {
+                    const dateStr = docData.uoi ? docData.uoi.toDate().toLocaleDateString('ar-EG', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}) : '';
+                    const hours = docData.separatorHours || 0;
+                    headerHTML = `
+                        <tr style="background-color: #f0fdf4; border-bottom: 2px solid var(--primary-color);">
+                            <td colspan="6" style="padding: 12px; text-align: center; color: #064e3b; background-color: #f0fdf4 !important;">
+                                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 4px;">المتابعة اليومية - ${docData.dayLabel || ''}</div>
+                                <div style="font-size: 0.9rem; font-weight: normal;">التاريخ: ${dateStr} | عدد الساعات: ${hours}</div>
+                            </td>
+                        </tr>
+                    `;
+                } 
+                // Weekly/Monthly Summary Header
+                else if (docData.type === 'summary') {
+                    const typeStr = docData.frequency === 'weekly' ? 'الأسبوعي' : 'الشهري';
+                    const start = docData.reportStartDate ? docData.reportStartDate.toDate().toLocaleDateString('ar-EG') : '';
+                    const end = docData.reportEndDate ? docData.reportEndDate.toDate().toLocaleDateString('ar-EG') : '';
+                    const hours = docData.asd || 0; 
+                    const pages = docData.totalPages || 0;
+                    headerHTML = `
+                        <tr style="background-color: #fffbeb; border-bottom: 2px solid var(--gold-color);">
+                            <td colspan="6" style="padding: 12px; text-align: center; color: #b45309; background-color: #fffbeb !important;">
+                                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 4px;">التقرير ${typeStr}</div>
+                                <div style="font-size: 0.9rem; font-weight: normal; color: #374151;">
+                                    التاريخ: ${start} - ${end} <br>
+                                    عدد الساعات: ${hours} | عدد الصفحات التي سمعها الطلاب: ${pages}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // --- BUILD TEMP TABLE FOR SCREENSHOT ---
+            const tempTable = document.createElement('table'); 
+            tempTable.style.width = '100%'; 
+            tempTable.style.borderCollapse = 'collapse'; 
+            tempTable.style.backgroundColor = '#ffffff'; // Force white bg for container
+            tempTable.style.direction = 'rtl';
+            
             const tbody = document.createElement('tbody');
-            rowsToCapture.forEach(row => { const clone = row.cloneNode(true); if(clone.querySelector('.screenshot-dot-container')) clone.querySelector('.screenshot-dot-container').remove(); if(clone.querySelector('.col-actions')) clone.querySelector('.col-actions').remove(); if(clone.querySelector('.btn-delete-report')) clone.querySelector('.btn-delete-report').remove();
-            Array.from(clone.children).forEach(td => { td.style.backgroundColor = '#ffffff'; td.style.color = '#000000'; td.style.borderBottom = '1px solid #e5e7eb'; }); tbody.appendChild(clone); });
+            
+            // 1. Inject Custom Header First (Row 1)
+            if(headerHTML) {
+                tbody.innerHTML = headerHTML;
+            }
+
+            // 2. Clone Standard Table Headers (Row 2)
+            // تحديث: إظهار عناوين الجدول فقط في المتابعة اليومية (نوع separator)
+            // وإخفاؤها في التقارير الأسبوعية والشهرية (نوع summary)
+            if (docData && docData.type !== 'summary') {
+                const headerRow = document.querySelector('#records-table thead tr').cloneNode(true);
+                // Clean header row: remove action columns
+                const headerActions = headerRow.querySelector('.col-actions');
+                if(headerActions) headerActions.remove();
+                const headerScore = headerRow.querySelector('.col-score');
+                if(headerScore && headerScore.style.display === 'none') headerScore.remove();
+                
+                // Force header styles for high contrast
+                Array.from(headerRow.children).forEach(th => { 
+                    th.style.backgroundColor = '#064e3b'; 
+                    th.style.color = '#ffffff'; 
+                    th.style.borderBottom = '2px solid #D4AF37';
+                    th.style.padding = '10px';
+                    th.style.fontFamily = 'Cairo, sans-serif';
+                });
+                tbody.appendChild(headerRow);
+            }
+
+            // 3. Add Data Rows (Row 3+)
+            rowsToCapture.forEach(row => { 
+                const clone = row.cloneNode(true); 
+                // Remove UI elements
+                if(clone.querySelector('.screenshot-dot-container')) clone.querySelector('.screenshot-dot-container').remove(); 
+                if(clone.querySelector('.col-actions')) clone.querySelector('.col-actions').remove(); 
+                if(clone.querySelector('.btn-delete-report')) clone.querySelector('.btn-delete-report').remove();
+                
+                // --- FIX BRIGHTNESS: Force White BG and Black Text ---
+                Array.from(clone.children).forEach(td => { 
+                    td.style.backgroundColor = '#ffffff'; 
+                    td.style.color = '#000000'; 
+                    td.style.borderBottom = '1px solid #e5e7eb';
+                    td.style.fontFamily = 'Cairo, sans-serif';
+                }); 
+                tbody.appendChild(clone); 
+            });
+            
             tempTable.appendChild(tbody);
-            const container = document.createElement('div'); container.style.position = 'fixed'; container.style.left = '-9999px'; container.style.top = '0'; container.style.padding = '20px'; container.style.background = '#ffffff'; container.style.width = 'fit-content'; container.appendChild(tempTable); document.body.appendChild(container);
+            
+            const container = document.createElement('div'); 
+            container.style.position = 'fixed'; 
+            container.style.left = '-9999px'; 
+            container.style.top = '0'; 
+            container.style.padding = '20px'; 
+            container.style.background = '#ffffff'; 
+            container.style.width = 'fit-content'; 
+            container.appendChild(tempTable); 
+            document.body.appendChild(container);
+
             try {
-                const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false });
-                const image = canvas.toDataURL("image/png"); const link = document.createElement('a'); link.href = image; let fileName = 'سجل'; if(rowsToCapture[0].classList.contains('summary-row')) fileName = rowsToCapture[0].querySelector('.report-title-text')?.innerText.replace(/\s+/g, '_').substring(0, 15) || 'تقرير';
-                link.download = `${fileName}-${new Date().toISOString().slice(0,10)}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link); showToast('تم حفظ الصورة', 'success'); toggleScreenshotMode();
+                const canvas = await html2canvas(container, { 
+                    scale: 2, 
+                    useCORS: true, 
+                    backgroundColor: '#ffffff', // Force white bg
+                    logging: false 
+                });
+                const image = canvas.toDataURL("image/png"); 
+                const link = document.createElement('a'); 
+                link.href = image; 
+                let fileName = 'سجل'; 
+                if(rowsToCapture[0].classList.contains('summary-row')) {
+                    fileName = rowsToCapture[0].querySelector('.report-title-text')?.innerText.replace(/\s+/g, '_').substring(0, 15) || 'تقرير';
+                }
+                link.download = `${fileName}-${new Date().toISOString().slice(0,10)}.png`; 
+                document.body.appendChild(link); 
+                link.click(); 
+                document.body.removeChild(link); 
+                showToast('تم حفظ الصورة', 'success'); 
+                toggleScreenshotMode();
             } catch { showToast('فشل التقاط الصورة', 'error'); }
             finally { if (document.body.contains(container)) document.body.removeChild(container); }
         }
@@ -1550,33 +1689,14 @@
             const levelGroup = document.getElementById('level-group');
             const rangeInputs = document.getElementById('range-inputs');
             
-            // Get references to inputs to toggle 'required'
-            const levelInput = document.getElementById('level');
-            const fromInput = document.getElementById('amount-from');
-            const toInput = document.getElementById('amount-to');
-            
             if (val === 'absent') {
-                // Hide fields
                 levelGroup.style.display = 'none';
                 rangeInputs.style.display = 'none';
-                
-                // Remove 'required' attribute to allow save without them
-                levelInput.required = false;
-                fromInput.required = false;
-                toInput.required = false;
-                
                 // Clear page total for clarity
                 document.getElementById('amount-total').value = 0;
             } else {
-                // Show fields
                 levelGroup.style.display = ''; // Reset to CSS default
                 rangeInputs.style.display = ''; // Reset to CSS default
-                
-                // Add 'required' attribute back
-                levelInput.required = true;
-                // Note: from/to are optional in the original design (only total matters for logic), 
-                // but usually if you want to enforce presence, set to true. 
-                // The logic in calculateTotal handles them being empty.
             }
         });
     </script>
