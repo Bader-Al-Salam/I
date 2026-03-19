@@ -11,23 +11,7 @@
       "src": "https://i.postimg.cc/bNqb3yWJ/5866036315810368735-121.jpg",
       "sizes": "800x800",
       "type": "image/jpeg",
-      "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "https://placehold.co/1280x720/022c22/D4AF37?text=Desktop+View",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "واجهة سطح المكتب"
-    },
-    {
-      "src": "https://placehold.co/390x844/022c22/D4AF37?text=Mobile+View",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "واجهة الجوال"
+      "purpose": "any"
     }
   ]
 }
