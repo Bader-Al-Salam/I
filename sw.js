@@ -1,11 +1,9 @@
-const CACHE_NAME = 'badr-salam-v2'; // قمنا بتغيير رقم النسخة لتحديث الكاش القديم
+const CACHE_NAME = 'badr-salam-v2'; // تأكد أنه v2
 
-// قائمة بجميع الملفات التي نريد حفظها ليعمل الموقع بدون إنترنت
 const ASSETS = [
     './',
     './index.html',
     './manifest.json',
-    // صفحات المدرسين (مهم جداً ليعمل التطبيق عند الضغط على البطاقات)
     './Maad.html',
     './Awad.html',
     './Taha.html',
