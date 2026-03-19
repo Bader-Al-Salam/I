@@ -1,9 +1,24 @@
-const CACHE_NAME = 'badr-salam-v1';
+const CACHE_NAME = 'badr-salam-v2'; // قمنا بتغيير رقم النسخة لتحديث الكاش القديم
+
+// قائمة بجميع الملفات التي نريد حفظها ليعمل الموقع بدون إنترنت
 const ASSETS = [
     './',
     './index.html',
-    './manifest.json'
-    // يمكنك إضافة روابط الصور هنا إذا كانت محلية
+    './manifest.json',
+    // صفحات المدرسين (مهم جداً ليعمل التطبيق عند الضغط على البطاقات)
+    './Maad.html',
+    './Awad.html',
+    './Taha.html',
+    './Modar.html',
+    './Tarage.html',
+    './Tahane.html',
+    './Marwa.html',
+    './Rawda.html',
+    './FatemaF.html',
+    './FatemaM.html',
+    './Aia.html',
+    './Marwazainab.html',
+    './Aliaa.html'
 ];
 
 self.addEventListener('install', (e) => {
