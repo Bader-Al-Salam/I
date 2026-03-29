@@ -175,7 +175,14 @@
         .separator-label-container:hover { background-color: var(--primary-dark); }
         .separator-label-container .hidden-count { display: none; font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 1px 4px; border-radius: 4px; }
         .separator-label-container.has-hidden .hidden-count { display: inline-block; }
-        .separator-hours { background-color: var(--gold-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; }
+        .separator-hours { background-color: var(--gold-color); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 5px; cursor: pointer; }
+
+        /* Separator Controls */
+        .sep-controls { display: flex; align-items: center; gap: 5px; margin-left: 5px; border-right: 1px solid rgba(255,255,255,0.3); padding-right: 5px; }
+        .sep-move-btn, .sep-edit-btn { cursor: pointer; color: #fff; opacity: 0.8; transition: all 0.2s; font-size: 0.8rem; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+        .sep-move-btn:hover, .sep-edit-btn:hover { opacity: 1; color: var(--gold-color); transform: scale(1.2); }
+        
+        body.screenshot-mode .sep-controls { display: none; }
 
         .separator-delete-btn {
             position: absolute; left: 50%; top: -10px; transform: translateX(-50%);
@@ -369,7 +376,6 @@
                         </div>
                     </div>
                     
-                    <!-- حقول التسميع دائماً ظاهرة -->
                     <div id="range-inputs" class="input-row" style="margin-top:0.5rem;">
                         <div class="form-group"><label>من</label><input type="number" id="amount-from" class="form-control" placeholder="صفحة" step="any" oninput="calculateTotal()"></div>
                         <div class="form-group"><label>إلى</label><input type="number" id="amount-to" class="form-control" placeholder="صفحة" step="any" oninput="calculateTotal()"></div>
@@ -529,6 +535,37 @@
         </div>
     </div>
 
+    <!-- Modal for Separator Edit Only (Day/Hours) -->
+    <div id="separator-edit-modal" class="modal-bg" onclick="if(event.target === this) closeSeparatorModal()">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeSeparatorModal()">&times;</button>
+            <div class="dev-avatar" style="background: var(--primary-color);"><i class="fas fa-cog"></i></div>
+            <h3 class="dev-name">تعديل معلومات الفاصل</h3>
+            
+            <div class="form-group" style="text-align: right; margin-top: 1rem;">
+                <label>اليوم</label>
+                <select id="sep-edit-day" class="form-control">
+                    <option value="الأحد">الأحد</option>
+                    <option value="الإثنين">الإثنين</option>
+                    <option value="الثلاثاء">الثلاثاء</option>
+                    <option value="الأربعاء">الأربعاء</option>
+                    <option value="الخميس">الخميس</option>
+                    <option value="الجمعة">الجمعة</option>
+                    <option value="السبت">السبت</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="text-align: right; margin-top: 0.5rem;">
+                <label>عدد الساعات</label>
+                <input type="number" id="sep-edit-hours" class="form-control" min="0" step="0.5">
+            </div>
+
+            <button type="button" class="btn-submit" onclick="saveSeparatorInfo()" style="margin-top: 1rem;">
+                <i class="fas fa-save"></i> حفظ التغييرات
+            </button>
+        </div>
+    </div>
+
     <div id="dev-info-modal" class="modal-bg" onclick="if(event.target === this) toggleDevInfo()">
         <div class="modal-content">
             <button class="close-modal" onclick="toggleDevInfo()">&times;</button>
@@ -595,6 +632,99 @@
         let isScreenshotMode = false;
         let collapsedSeparators = JSON.parse(localStorage.getItem('hifz_platform_collapsed') || '{}');
         let currentFilterGroupId = null; 
+        let editingSeparatorId = null; 
+
+        // Separator Modal Functions
+        window.openSeparatorModal = (id) => {
+            if(!auth.currentUser) return showToast('يجب تسجيل الدخول', 'warning');
+            editingSeparatorId = id;
+            const docData = cachedSnapshot.docs.find(d => d.id === id)?.data();
+            if(docData) {
+                document.getElementById('sep-edit-day').value = docData.dayLabel || 'الأحد';
+                document.getElementById('sep-edit-hours').value = docData.separatorHours || 0;
+            }
+            document.getElementById('separator-edit-modal').style.display = 'flex';
+        }
+
+        window.closeSeparatorModal = () => {
+            document.getElementById('separator-edit-modal').style.display = 'none';
+            editingSeparatorId = null;
+        }
+
+        window.saveSeparatorInfo = async () => {
+            if(!editingSeparatorId) return;
+            const day = document.getElementById('sep-edit-day').value;
+            const hours = parseFloat(document.getElementById('sep-edit-hours').value);
+            
+            try {
+                await updateDoc(doc(db, "daily_records", editingSeparatorId), {
+                    dayLabel: day,
+                    separatorHours: hours
+                });
+                showToast('تم تحديث معلومات الفاصل', 'success');
+                closeSeparatorModal();
+            } catch(e) {
+                console.error(e);
+                showToast('فشل التحديث', 'error');
+            }
+        }
+
+        // --- DIRECT MOVEMENT LOGIC ---
+        window.moveSeparator = async (id, direction) => {
+            if(!auth.currentUser) return showToast('يجب تسجيل الدخول', 'warning');
+            if(!cachedSnapshot) return;
+
+            const docs = cachedSnapshot.docs;
+            let currentIndex = -1;
+
+            // Find index of the separator
+            for(let i=0; i<docs.length; i++) {
+                if(docs[i].id === id) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if(currentIndex === -1) return showToast('خطأ في تحديد الموقع', 'error');
+
+            // Determine target index based on direction
+            // Visual Up = Higher in list = Lower Index (i-1)
+            // Visual Down = Lower in list = Higher Index (i+1)
+            let targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+            // Boundary checks
+            if(targetIndex < 0) return showToast('وصلت لأعلى القائمة', 'warning');
+            if(targetIndex >= docs.length) return showToast('وصلت لأسفل القائمة', 'warning');
+
+            // Get documents
+            const sepDoc = docs[currentIndex];
+            const targetDoc = docs[targetIndex];
+
+            // Check if we are trying to swap with another separator or summary (optional safety)
+            // For now, we allow swapping with any neighbor to keep it simple and robust
+            if (targetDoc.data().type === 'separator' || targetDoc.data().type === 'summary') {
+                return showToast('لا يمكن التحرك فوق فاصل آخر', 'info');
+            }
+
+            try {
+                const sepTs = sepDoc.data().uoi;
+                const targetTs = targetDoc.data().uoi;
+
+                const batch = writeBatch(db);
+                
+                // Set separator time to target's time
+                batch.update(sepDoc.ref, { uoi: targetTs });
+                
+                // Set target's time to separator's old time
+                batch.update(targetDoc.ref, { uoi: sepTs });
+
+                await batch.commit();
+                showToast('تم تحريك الفاصل', 'success');
+            } catch(e) {
+                console.error(e);
+                showToast('فشل التحريك', 'error');
+            }
+        }
 
         window.openDutySettings = () => {
             if (!auth.currentUser) return showToast('يجب تسجيل الدخول', 'warning');
@@ -725,11 +855,6 @@
             }
         }
 
-        /**
-         * حساب المجموع:
-         * - إذا أي حقل يحتوي فاصلة (عشري) → نجمع العددين مباشرة بدون +1
-         * - إذا كلاهما أعداد صحيحة → إلى - من + 1
-         */
         window.calculateTotal = () => {
             const fromStr = document.getElementById('amount-from').value;
             const toStr = document.getElementById('amount-to').value;
@@ -741,17 +866,14 @@
                 return;
             }
 
-            // التحقق من وجود فاصلة عشرية (نقطة أو فاصلة عربية)
             const fromHasDecimal = fromStr.includes('.') || fromStr.includes(',');
             const toHasDecimal = toStr.includes('.') || toStr.includes(',');
 
             if (fromHasDecimal || toHasDecimal) {
-                // جمع مباشر بدون +1
                 const valF = isNaN(f) ? 0 : f;
                 const valT = isNaN(t) ? 0 : t;
                 document.getElementById('amount-total').value = valF + valT;
             } else {
-                // أعداد صحيحة: المنطق القديم (إلى - من + 1)
                 if (t >= f && !isNaN(f) && !isNaN(t)) {
                     document.getElementById('amount-total').value = (t - f) + 1;
                 } else {
@@ -1163,7 +1285,6 @@
                 document.getElementById('notes').value = d.nmk || '';
                 if (d.attr) document.getElementById('attendance').value = d.attr;
                 
-                // تحميل بيانات من/إلى/المجموع
                 if (d.page_from !== undefined && d.page_to !== undefined) { 
                     document.getElementById('amount-from').value = d.page_from; 
                     document.getElementById('amount-to').value = d.page_to; 
@@ -1345,6 +1466,7 @@
                     if (sepClone.querySelector('.screenshot-dot-container')) sepClone.querySelector('.screenshot-dot-container').remove();
                     if (sepClone.querySelector('.export-dot-container')) sepClone.querySelector('.export-dot-container').remove();
                     if (sepClone.querySelector('.separator-delete-btn')) sepClone.querySelector('.separator-delete-btn').remove();
+                    if (sepClone.querySelector('.sep-controls')) sepClone.querySelector('.sep-controls').remove();
                     tempBody.appendChild(sepClone);
                 }
                 rows.forEach(row => {
@@ -1461,6 +1583,7 @@
                 if(clone.querySelector('.export-dot-container')) clone.querySelector('.export-dot-container').remove(); 
                 if(clone.querySelector('.col-actions')) clone.querySelector('.col-actions').remove(); 
                 if(clone.querySelector('.btn-delete-report')) clone.querySelector('.btn-delete-report').remove();
+                if(clone.querySelector('.sep-controls')) clone.querySelector('.sep-controls').remove();
                 
                 Array.from(clone.children).forEach(td => { 
                     td.style.backgroundColor = '#ffffff'; 
@@ -1626,7 +1749,19 @@
                              const arrowIcon = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down';
                              const hiddenClass = isCollapsed && count > 0 ? 'has-hidden' : ''; 
                              const hiddenText = isCollapsed && count > 0 ? `<span class="hidden-count">(${count})</span>` : '';
-                             const hoursText = d.separatorHours ? `<span class="separator-hours">⏱ ${d.separatorHours}س</span>` : '';
+                             const hoursText = d.separatorHours ? `<span class="separator-hours" onclick="openSeparatorModal('${docSnap.id}')">⏱ ${d.separatorHours}س</span>` : '';
+
+                             // New Controls HTML
+                             let controlsHTML = '';
+                             if(isAdmin) {
+                                 controlsHTML = `
+                                    <div class="sep-controls">
+                                        <div class="sep-edit-btn" onclick="openSeparatorModal('${docSnap.id}')" title="تعديل المعلومات"><i class="fas fa-cog"></i></div>
+                                        <div class="sep-move-btn" onclick="moveSeparator('${docSnap.id}', 'up')" title="تحريك للأعلى"><i class="fas fa-arrow-up"></i></div>
+                                        <div class="sep-move-btn" onclick="moveSeparator('${docSnap.id}', 'down')" title="تحريك للأسفل"><i class="fas fa-arrow-down"></i></div>
+                                    </div>
+                                 `;
+                             }
                              
                              const tr = document.createElement('tr'); tr.className = 'separator-row'; tr.setAttribute('data-id', sepId);
                              const dotHTML = `<div class="screenshot-dot-container"><div class="screenshot-dot" onclick="captureSection('${sepId}')"><i class="fas fa-camera"></i></div></div>`;
@@ -1634,7 +1769,7 @@
                              const cursorStyle = isLocked ? 'default' : 'pointer';
                              const clickAction = isLocked ? '' : `onclick="toggleCollapse('${docSnap.id}')"`;
 
-                             tr.innerHTML = `<td colspan="${colSpanCount}"><div class="red-separator-line">${dotHTML}<div class="separator-label-container ${hiddenClass}" style="cursor:${cursorStyle}" ${clickAction}><i class="fas ${arrowIcon}" style="margin-left:5px; ${isLocked?'display:none':''}"></i><span>${d.dayLabel || 'فصل'}</span>${hoursText}${hiddenText}</div>${deleteBtnHTML}</div></td>`;
+                             tr.innerHTML = `<td colspan="${colSpanCount}"><div class="red-separator-line">${dotHTML}<div class="separator-label-container ${hiddenClass}" style="cursor:${cursorStyle}" ${clickAction}><i class="fas ${arrowIcon}" style="margin-left:5px; ${isLocked?'display:none':''}"></i><span>${d.dayLabel || 'فصل'}</span>${hoursText}${hiddenText}${controlsHTML}</div>${deleteBtnHTML}</div></td>`;
                              
                              fragment.appendChild(tr); 
                              if (isCollapsed && hasNextSeparator) skipMode = true;
