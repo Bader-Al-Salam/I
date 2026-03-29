@@ -535,7 +535,7 @@
         </div>
     </div>
 
-    <!-- Modal for Separator Edit Only (Day/Hours) -->
+    <!-- Modal for Separator Edit (Date & Hours) -->
     <div id="separator-edit-modal" class="modal-bg" onclick="if(event.target === this) closeSeparatorModal()">
         <div class="modal-content">
             <button class="close-modal" onclick="closeSeparatorModal()">&times;</button>
@@ -543,16 +543,8 @@
             <h3 class="dev-name">تعديل معلومات الفاصل</h3>
             
             <div class="form-group" style="text-align: right; margin-top: 1rem;">
-                <label>اليوم</label>
-                <select id="sep-edit-day" class="form-control">
-                    <option value="الأحد">الأحد</option>
-                    <option value="الإثنين">الإثنين</option>
-                    <option value="الثلاثاء">الثلاثاء</option>
-                    <option value="الأربعاء">الأربعاء</option>
-                    <option value="الخميس">الخميس</option>
-                    <option value="الجمعة">الجمعة</option>
-                    <option value="السبت">السبت</option>
-                </select>
+                <label>تاريخ الفصل</label>
+                <input type="date" id="sep-edit-date" class="form-control">
             </div>
 
             <div class="form-group" style="text-align: right; margin-top: 0.5rem;">
@@ -640,8 +632,23 @@
             editingSeparatorId = id;
             const docData = cachedSnapshot.docs.find(d => d.id === id)?.data();
             if(docData) {
-                document.getElementById('sep-edit-day').value = docData.dayLabel || 'الأحد';
+                // Set hours
                 document.getElementById('sep-edit-hours').value = docData.separatorHours || 0;
+                
+                // Set Date from Timestamp if exists, otherwise today
+                if (docData.uoi) {
+                    const dateObj = docData.uoi.toDate();
+                    // Format to YYYY-MM-DD for input
+                    const year = dateObj.getFullYear();
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    document.getElementById('sep-edit-date').value = `${year}-${month}-${day}`;
+                } else {
+                    document.getElementById('sep-edit-date').valueAsDate = new Date();
+                }
+            } else {
+                document.getElementById('sep-edit-hours').value = 0;
+                document.getElementById('sep-edit-date').valueAsDate = new Date();
             }
             document.getElementById('separator-edit-modal').style.display = 'flex';
         }
@@ -653,13 +660,25 @@
 
         window.saveSeparatorInfo = async () => {
             if(!editingSeparatorId) return;
-            const day = document.getElementById('sep-edit-day').value;
+            const dateStr = document.getElementById('sep-edit-date').value;
+            
+            if(!dateStr) return showToast('يرجى اختيار التاريخ', 'warning');
+
+            // Create a Date object from the string (at noon to avoid timezone shifts)
+            const selectedDate = new Date(dateStr);
+            selectedDate.setHours(12, 0, 0, 0);
+
+            // Auto-determine day name from the selected date
+            const dayName = new Intl.DateTimeFormat('ar-SY', { weekday: 'long' }).format(selectedDate);
+            
             const hours = parseFloat(document.getElementById('sep-edit-hours').value);
             
             try {
                 await updateDoc(doc(db, "daily_records", editingSeparatorId), {
-                    dayLabel: day,
-                    separatorHours: hours
+                    dayLabel: dayName,
+                    separatorHours: hours,
+                    // IMPORTANT: Update the timestamp to match the selected date
+                    uoi: Timestamp.fromDate(selectedDate) 
                 });
                 showToast('تم تحديث معلومات الفاصل', 'success');
                 closeSeparatorModal();
@@ -1043,6 +1062,7 @@
             }
 
             try {
+                // Default to today, but user can edit later
                 const now = new Date();
                 const dayName = now.toLocaleDateString('ar-SY', { weekday: 'long' });
                 let separatorFreq = selectedTrackingFreq; 
@@ -1056,7 +1076,7 @@
                     separatorHours: todayTotalHours, 
                     uoi: serverTimestamp()
                 });
-                showToast('تم وضع الخط وحفظ الساعات', 'success');
+                showToast('تم وضع الخط وحفظ الساعات (يمكنك تعديل التاريخ من الإعدادات)', 'success');
             } catch(err) { showToast('خطأ', 'error'); }
         }
 
