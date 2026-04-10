@@ -1,3 +1,4 @@
+<!-- معاذ -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -128,11 +129,15 @@
         .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
         .stat-label { font-size: 0.75rem; color: var(--text-light); font-weight: 600; }
 
-        .table-container { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; border: 2px solid var(--gold-color); }
+        .table-container { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow-x: auto; border: 1px solid #cbd5e1; }
         table { width: 100%; border-collapse: collapse; } 
-        th, td { padding: 0.5rem 0.3rem; text-align: right; border-bottom: 1px solid rgba(212, 175, 55, 0.3); vertical-align: middle; font-size: 0.8rem; word-wrap: break-word; overflow-wrap: break-word; }
-        th { color: #fff; font-weight: 600; background-color: var(--primary-color); border-bottom: 2px solid var(--gold-color); font-size: 0.85rem; }
-        tr:hover td { background-color: var(--table-hover); }
+        th, td { padding: 0.5rem 0.3rem; text-align: right; border-bottom: 1px solid #cbd5e1; vertical-align: middle; font-size: 0.8rem; word-wrap: break-word; overflow-wrap: break-word; }
+        th { color: #fff; font-weight: 600; background-color: var(--primary-color); border-bottom: 2px solid #1f4b3a; font-size: 0.85rem; }
+        tr:hover td { background-color: #eef2f7; }
+        tr:not(.separator-row):not(.summary-row) td { border-right: 1px solid #e2e8f0; }
+        .highlight-zero td { background-color: #f8d7da !important; color: #7f1d1d !important; border: 1px solid #b91c1c !important; }
+        .highlight-zero td:last-child { border-right: none !important; }
+        .highlight-zero:hover td { background-color: #f8d7da !important; }
         
         .total-badge { background-color: rgba(6, 78, 59, 0.1); color: var(--primary-color); padding: 2px 5px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; margin-right: 3px; display: inline-block; border: 1px solid var(--gold-color); }
         body.dark-mode .total-badge { background-color: rgba(212, 175, 55, 0.2); color: var(--gold-color); border-color: var(--gold-color); }
@@ -201,7 +206,7 @@
             justify-content: center;
             margin-inline-start: 6px;
             margin-inline-end: 250px;
-            z-index: 5;
+            z-index: 1;
             order: -1; /* ensure it's placed first in the flex container */
         }
         body.screenshot-mode .screenshot-dot-container { display: flex; }
@@ -1885,12 +1890,19 @@
                 if(clone.querySelector('.col-actions')) clone.querySelector('.col-actions').remove(); 
                 if(clone.querySelector('.btn-delete-report')) clone.querySelector('.btn-delete-report').remove();
                 if(clone.querySelector('.sep-controls')) clone.querySelector('.sep-controls').remove();
-                
-                Array.from(clone.children).forEach(td => { 
-                    td.style.backgroundColor = '#ffffff'; 
-                    td.style.color = '#000000'; 
+                const originalCells = row.children;
+                Array.from(clone.children).forEach((td, idx) => { 
+                    const sourceCell = originalCells[idx] || td;
+                    const cellStyle = window.getComputedStyle(sourceCell);
+                    td.style.backgroundColor = cellStyle.backgroundColor || '#ffffff'; 
+                    td.style.color = '#000000';
                     td.style.borderBottom = '1px solid #e5e7eb';
                     td.style.fontFamily = 'Cairo, sans-serif';
+                    if (row.classList.contains('highlight-zero')) {
+                        td.style.backgroundColor = '#f8d7da';
+                        td.style.color = '#7f1d1d';
+                        td.style.border = '1px solid #b91c1c';
+                    }
                 }); 
                 tbody.appendChild(clone); 
             });
@@ -2114,6 +2126,10 @@
                         const tr = document.createElement('tr'); tr.setAttribute('data-sep-id', currentSepId);
                         // Tag regular rows with their groupId so summaries can be identified
                         if (d.groupId) tr.setAttribute('data-group-id', d.groupId);
+                        // Highlight rows with zero pages/listening in darker red and keep the row visually clear
+                        if ((d.frequency === 'daily' && d.asd === 0) || ((d.frequency === 'weekly' || d.frequency === 'monthly') && d.asd === 0)) {
+                            tr.classList.add('highlight-zero');
+                        }
                         tr.innerHTML = `<td style="font-weight:bold; font-size:0.85rem;">${d.qwe} ${statusBadge}</td><td style="font-size:0.85rem;">${displayAmountText}</td><td><div class="rating-wrapper">${badgeClass ? `<span class="badge ${badgeClass}">${badgeText}</span>` : `<span>-</span>`}</div></td>${scoreHTML}<td style="font-size: 0.8rem;">${d.nmk||'-'}</td><td style="font-size: 0.75rem; color:var(--text-light);">${t}</td>${finalActionsHTML}`;
                         // If a summary for this group already exists in fragment, insert this
                         // row right after the summary so the header stays above its rows.
