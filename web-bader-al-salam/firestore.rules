@@ -1,0 +1,36 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Public pages read these collections. Any signed-in supervisor can manage them.
+    match /news/{newsId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+
+    match /teachers/{teacherId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+
+    match /khatmeen_parts/{recordId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+
+    // The Maad pages use these collections without an author field.
+    match /daily_records/{recordId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+
+    match /students/{studentId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+  }
+}
