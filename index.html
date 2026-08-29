@@ -640,7 +640,12 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const IMGBB_API_KEY = "bd00959da67e97cc5b345e3159053e6f"; 
+        const IMGBB_API_KEY = "bd00959da67e97cc5b345e3159053e6f";
+        const SUPERVISOR_UID = "tllm2Z7G5VZZE6fPgtVraFtQlTd2";
+
+        function isSupervisor(user = auth.currentUser) {
+            return !!user && user.uid === SUPERVISOR_UID;
+        }
 
         // --- نظام التنبيهات المخصص (بديل alert/confirm) ---
         window.showSiteModal = function({ title, message, type = 'info', confirmText = 'تأكيد', cancelText = 'إلغاء' }) {
@@ -706,7 +711,21 @@
         // --- التعامل مع زر الصفحة الرئيسية ---
         window.handleHomeDashClick = function() {
             const user = auth.currentUser;
-            if(user) { navigate('dashboard'); } else { navigate('login'); }
+            if (!user) {
+                navigate('login');
+                return;
+            }
+
+            if (isSupervisor(user)) {
+                navigate('dashboard');
+                return;
+            }
+
+            showSiteModal({
+                title: 'عدم الصلاحية',
+                message: 'هذا الحساب ليس الحساب المسموح له بإدارة الموقع، لذلك لا توجد صلاحية للدخول إلى لوحة التحكم.',
+                type: 'info'
+            });
         };
 
         // --- التنقل ---
@@ -729,26 +748,51 @@
             const user = auth.currentUser;
             const loginBtn = document.getElementById('btnLoginNav');
             const dashBtn = document.getElementById('btnDashboardNav');
-            if (user) {
+            const supervisor = isSupervisor(user);
+
+            if (user && supervisor) {
                 loginBtn.style.display = 'none';
                 if (document.getElementById('news-view').classList.contains('active')) dashBtn.style.display = 'block';
                 else dashBtn.style.display = 'none';
-            } else {
-                loginBtn.style.display = 'block';
+                return;
+            }
+
+            if (user && !supervisor) {
+                loginBtn.style.display = 'none';
                 dashBtn.style.display = 'none';
                 if (document.getElementById('dashboard-view').classList.contains('active')) navigate('news');
+                return;
             }
+
+            loginBtn.style.display = 'block';
+            dashBtn.style.display = 'none';
+            if (document.getElementById('dashboard-view').classList.contains('active')) navigate('news');
         }
 
         // تحديث نص وزر الرئيسية
         function updateHomeDashBtn() {
             const btn = document.getElementById('homeDashboardBtn');
             const user = auth.currentUser;
-            if(user) {
-                btn.innerHTML = '⚙️ لوحة التحكم'; btn.style.borderColor = '#fff'; btn.style.color = '#fff';
-            } else {
-                btn.innerHTML = '🔐 دخول المدير'; btn.style.borderColor = 'var(--primary-gold)'; btn.style.color = 'var(--primary-gold)';
+            if (isSupervisor(user)) {
+                btn.innerHTML = '⚙️ لوحة التحكم';
+                btn.style.borderColor = '#fff';
+                btn.style.color = '#fff';
+                btn.disabled = false;
+                return;
             }
+
+            if (user) {
+                btn.innerHTML = '⛔ غير مسموح';
+                btn.style.borderColor = 'var(--danger-color)';
+                btn.style.color = '#fff';
+                btn.disabled = true;
+                return;
+            }
+
+            btn.innerHTML = '🔐 دخول المدير';
+            btn.style.borderColor = 'var(--primary-gold)';
+            btn.style.color = 'var(--primary-gold)';
+            btn.disabled = false;
         }
 
         // --- تبويبات لوحة التحكم ---
@@ -780,11 +824,12 @@
             newsContainer.innerHTML = '';
             if (allNewsData.length === 0) { newsContainer.innerHTML = '<p style="text-align:center; color:#888;">لا توجد أخبار حالياً.</p>'; return; }
             const toShow = allNewsData.slice(0, visibleCount);
+            const isAdminUser = isSupervisor(auth.currentUser);
             toShow.forEach(item => {
                 const date = item.createdAt ? new Date(item.createdAt.toDate()).toLocaleDateString('ar-EG') : '';
                 const imgHtml = item.imageUrl ? `<img src="${item.imageUrl}" onclick="window.openImage('${item.imageUrl}')" style="cursor:zoom-in">` : '';
                 let controls = '';
-                if (auth.currentUser) {
+                if (isAdminUser) {
                     controls = `<div class="admin-controls"><button class="btn-sm btn-edit" onclick="window.openEdit('${item.id}')">تعديل</button><button class="btn-sm btn-delete" onclick="window.deleteNews('${item.id}')">حذف</button></div>`;
                 }
                 const html = `<div class="news-item">${imgHtml}<div class="news-meta"><span>${date}</span></div><h3 class="news-title">${item.title}</h3><p class="news-body">${item.content}</p>${controls}</div>`;
@@ -807,7 +852,7 @@
         let khatmeenData = [];
         function renderKhatmeen() {
             khatmeenBody.innerHTML = '';
-            const isAdmin = Boolean(auth.currentUser);
+            const isAdmin = isSupervisor(auth.currentUser);
             document.getElementById('khatmeen-admin-panel').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('khatmeenActionsHeader').style.display = isAdmin ? 'table-cell' : 'none';
             if (!khatmeenData.length) { document.getElementById('khatmeenEmpty').style.display = 'block'; return; }
@@ -820,17 +865,25 @@
         const khatmeenQuery = query(collection(db, 'khatmeen_parts'), orderBy('createdAt', 'asc'));
         onSnapshot(khatmeenQuery, snap => { khatmeenData = []; snap.forEach(item => khatmeenData.push({ id: item.id, ...item.data() })); renderKhatmeen(); });
         document.getElementById('khatmeenForm').onsubmit = async e => {
-            e.preventDefault(); if (!auth.currentUser) return; const button = e.target.querySelector('button[type="submit"]'); button.disabled = true;
+            e.preventDefault();
+            if (!isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'هذا الحساب ليس الحساب المسموح له بإضافة أو تعديل سجل الخاتمين.', type: 'info' });
+                return;
+            }
+            const button = e.target.querySelector('button[type="submit"]'); button.disabled = true;
             try { await addDoc(collection(db, 'khatmeen_parts'), { name: document.getElementById('khatmeenName').value.trim(), part: document.getElementById('khatmeenPart').value.trim(), score: Number(document.getElementById('khatmeenScore').value), date: document.getElementById('khatmeenDate').value, type: 'entry', createdAt: serverTimestamp(), author: auth.currentUser.email }); e.target.reset(); await showSiteModal({ title: 'تم الحفظ', message: 'تمت إضافة الطالب إلى سجل الخاتمين.', type: 'success' }); } catch (error) { await showSiteModal({ title: 'خطأ', message: error.message, type: 'error' }); } finally { button.disabled = false; }
         };
-        document.getElementById('addKhatmeenSeparator').onclick = async () => { if (!auth.currentUser) return; const label = prompt('اكتب اسم الشهر، مثال: شهر محرم 1448'); if (!label || !label.trim()) return; try { await addDoc(collection(db, 'khatmeen_parts'), { type: 'separator', label: label.trim(), createdAt: serverTimestamp(), author: auth.currentUser.email }); } catch (error) { await showSiteModal({ title: 'خطأ', message: error.message, type: 'error' }); } };
-        window.deleteKhatmeen = async id => { const confirmed = await showSiteModal({ title: 'حذف السجل', message: 'هل أنت متأكد من حذف هذا السجل؟', type: 'confirm', confirmText: 'حذف' }); if (confirmed) { try { await deleteDoc(doc(db, 'khatmeen_parts', id)); } catch (error) { await showSiteModal({ title: 'خطأ', message: error.message, type: 'error' }); } } };
-        window.deleteKhatmeenSeparator = async id => { if (!auth.currentUser) return; const confirmed = await showSiteModal({ title: 'حذف فاصل الشهر', message: 'هل أنت متأكد من حذف فاصل هذا الشهر؟ سيتم حذف الفاصل فقط ولن تُحذف سجلات الطلاب.', type: 'confirm', confirmText: 'حذف الفاصل' }); if (confirmed) { try { await deleteDoc(doc(db, 'khatmeen_parts', id)); } catch (error) { await showSiteModal({ title: 'خطأ', message: error.message, type: 'error' }); } } };
+        document.getElementById('addKhatmeenSeparator').onclick = async () => { if (!isSupervisor(auth.currentUser)) { await showSiteModal({ title: 'عدم الصلاحية', message: 'فقط المشرف المسموح له إضافة فواصل الشهور.', type: 'info' }); return; } const label = prompt('اكتب اسم الشهر، مثال: شهر محرم 1448'); if (!label || !label.trim()) return; try { await addDoc(collection(db, 'khatmeen_parts'), { type: 'separator', label: label.trim(), createdAt: serverTimestamp(), author: auth.currentUser.email }); } catch (error) { await showSiteModal({ title: 'خطأ', message: error.message, type: 'error' }); } };
+        window.deleteKhatmeen = async id => { if (!isSupervisor(auth.currentUser)) { await showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية حذف سجل الخاتمين.', type: 'info' }); return; } const confirmed = await showSiteModal({ title: 'حذف السجل', message: 'هل أنت متأكد من حذف هذا السجل؟', type: 'confirm', confirmText: 'حذف' }); if (confirmed) { try { await deleteDoc(doc(db, 'khatmeen_parts', id)); } catch (error) { await showSiteModal({ title: 'خطأ', message: error.message, type: 'error' }); } } };
+        window.deleteKhatmeenSeparator = async id => { if (!isSupervisor(auth.currentUser)) { await showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية حذف فاصل الشهور.', type: 'info' }); return; } const confirmed = await showSiteModal({ title: 'حذف فاصل الشهر', message: 'هل أنت متأكد من حذف فاصل هذا الشهر؟ سيتم حذف الفاصل فقط ولن تُحذف سجلات الطلاب.', type: 'confirm', confirmText: 'حذف الفاصل' }); if (confirmed) { try { await deleteDoc(doc(db, 'khatmeen_parts', id)); } catch (error) { await showSiteModal({ title: 'خطأ', message: error.message, type: 'error' }); } } };
 
         // --- إضافة خبر ---
         document.getElementById('postForm').onsubmit = async (e) => {
             e.preventDefault();
-            if(!auth.currentUser) return;
+            if(!isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'فقط المشرف المسموح له نشر الأخبار.', type: 'info' });
+                return;
+            }
             const btn = e.target.querySelector('button');
             const originalText = btn.textContent;
             btn.textContent = "جاري النشر..."; btn.disabled = true;
@@ -857,6 +910,10 @@
 
         // حذف خبر واحد
         window.deleteNews = async (id) => {
+            if (!isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية حذف الأخبار.', type: 'info' });
+                return;
+            }
             const confirmed = await showSiteModal({ 
                 title: 'حذف الخبر', 
                 message: 'هل أنت متأكد من حذف هذا الخبر؟ لا يمكن التراجع عن هذا الإجراء.',
@@ -869,6 +926,10 @@
         };
 
         window.openEdit = (id) => {
+            if (!isSupervisor(auth.currentUser)) {
+                showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية تعديل الأخبار.', type: 'info' });
+                return;
+            }
             const post = allNewsData.find(p => p.id === id);
             if(!post) return;
             document.getElementById('editPostId').value = post.id;
@@ -879,6 +940,10 @@
         };
         document.getElementById('editForm').onsubmit = async (e) => {
             e.preventDefault();
+            if (!isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية تعديل الأخبار.', type: 'info' });
+                return;
+            }
             const id = document.getElementById('editPostId').value;
             const updates = { title: document.getElementById('editTitle').value, content: document.getElementById('editContent').value };
             const file = document.getElementById('editImage').files[0];
@@ -890,8 +955,8 @@
         // --- وظيفة حذف جميع الأخبار ---
         document.getElementById('btnDeleteAllNews').addEventListener('click', async () => {
             // التحقق من تسجيل الدخول
-            if (!auth.currentUser) {
-                await showSiteModal({ title: 'تنبيه', message: 'يجب عليك تسجيل الدخول للقيام بهذا الإجراء.', type: 'info' });
+            if (!auth.currentUser || !isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'فقط المشرف المسموح له حذف جميع الأخبار.', type: 'info' });
                 return;
             }
 
@@ -925,7 +990,10 @@
         // --- إدارة المعلمين ---
         document.getElementById('teacherForm').onsubmit = async (e) => {
             e.preventDefault();
-            if(!auth.currentUser) return;
+            if(!isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'فقط المشرف المسموح له إضافة المعلمين.', type: 'info' });
+                return;
+            }
             const btn = e.target.querySelector('button');
             btn.textContent = "جاري الحفظ..."; btn.disabled = true;
             try {
@@ -955,12 +1023,12 @@
             tContainer.innerHTML = '';
             if(snap.empty) { tContainer.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#888;">لا يوجد معلمين.</p>'; return; }
 
+            const isAdmin = isSupervisor(auth.currentUser);
             snap.forEach(doc => {
                 const t = doc.data();
                 const isMale = t.gender === 'male';
                 const maleIconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm-2.41 15.53L8 21h8l-1.59-3.47c-1.36.37-2.77.37-4.13 0zM12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
                 const femaleIconSvg = `<svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm-6 12v-2.42a7 7 0 0 1 12 0V14h-2v-2.42a5 5 0 0 0-10 0V14H6zm-4 4v2h20v-2H2z"/></svg>`;
-                const isAdmin = Boolean(auth.currentUser);
                 
                 let buttonsHtml = '';
                 if(isAdmin) {
@@ -988,6 +1056,10 @@
         onSnapshot(tQuery, renderTeachers);
 
         window.deleteTeacher = async (id) => {
+            if (!isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية حذف المعلمين.', type: 'info' });
+                return;
+            }
             const confirmed = await showSiteModal({
                 title: 'حذف المعلم',
                 message: 'هل أنت متأكد من حذف هذا المعلم؟',
@@ -1001,6 +1073,10 @@
 
         // --- تعديل المعلم ---
         window.openEditTeacher = (id) => {
+            if (!isSupervisor(auth.currentUser)) {
+                showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية تعديل بيانات المعلمين.', type: 'info' });
+                return;
+            }
             getDoc(doc(db, "teachers", id)).then((docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -1016,6 +1092,10 @@
 
         document.getElementById('editTeacherForm').onsubmit = async (e) => {
             e.preventDefault();
+            if (!isSupervisor(auth.currentUser)) {
+                await showSiteModal({ title: 'عدم الصلاحية', message: 'ليس لديك صلاحية تعديل بيانات المعلمين.', type: 'info' });
+                return;
+            }
             const id = document.getElementById('editTeacherId').value;
             if(!id) return;
             
@@ -1039,7 +1119,17 @@
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
+                const credential = await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
+                if (!isSupervisor(credential.user)) {
+                    await signOut(auth);
+                    await showSiteModal({
+                        title: 'عدم الصلاحية',
+                        message: 'هذا الحساب غير المسموح له بإدارة الموقع. سيظهر المحتوى للجميع فقط بدون صلاحية تعديل.',
+                        type: 'info'
+                    });
+                    navigate('news');
+                    return;
+                }
                 navigate('news');
             } catch (err) {
                 const errEl = document.getElementById('loginError');
@@ -1071,7 +1161,18 @@
             });
         };
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
+            if (user && !isSupervisor(user)) {
+                await signOut(auth);
+                await showSiteModal({
+                    title: 'عدم الصلاحية',
+                    message: 'هذا الحساب ليس الحساب المسموح له بإدارة الموقع، لذلك سيتم الخروج تلقائياً وسيظهر المحتوى للزوار فقط بدون صلاحية التعديل.',
+                    type: 'info'
+                });
+                navigate('news');
+                return;
+            }
+
             updateNavState();
             updateHomeDashBtn();
             renderNews();
