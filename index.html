@@ -429,6 +429,13 @@
         <div id="homeChoices" class="home-choice-grid">
             <button class="home-choice-card" onclick="showCircles()"><div class="choice-icon"><i class="fa-solid fa-book-quran" aria-hidden="true"></i></div><h2>الحلقات كاملة</h2><p>تصفح جميع حلقات المعهد ومعلميها</p></button>
             <button class="home-choice-card" onclick="navigate('khatmeen')"><div class="choice-icon"><i class="fa-solid fa-trophy" aria-hidden="true"></i></div><h2>الخاتمون الأجزاء</h2><p>سجل الطلاب الذين ختموا أجزاء القرآن</p></button>
+            <div id="memberGroupCard" class="home-choice-card" style="display:none;">
+                <a href="ac24://open3960551-u57mqg/a" target="_blank" rel="noopener noreferrer" style="display:flex; flex-direction:column; align-items:flex-start; justify-content:center; width:100%; color:inherit; text-decoration:none;">
+                    <div class="choice-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
+                    <h2>المجموعة</h2>
+                    <p>الدخول إلى مجموعة المعهد</p>
+                </a>
+            </div>
         </div>
         <div id="circlesContent" style="display:none;">
         <h2 class="home-section-heading">الحلقات كاملة</h2>
@@ -792,6 +799,7 @@
             window.scrollTo(0, 0);
             updateNavState();
             updateHomeDashBtn();
+            updateMemberGroupCard();
         };
 
         window.openSidePanel = function() {
@@ -809,6 +817,14 @@
 
         window.showCircles = function() { document.getElementById('homeChoices').style.display = 'none'; document.getElementById('circlesContent').style.display = 'block'; };
         window.showHomeChoices = function() { document.getElementById('homeChoices').style.display = 'grid'; document.getElementById('circlesContent').style.display = 'none'; };
+
+        function updateMemberGroupCard() {
+            const card = document.getElementById('memberGroupCard');
+            if (!card) return;
+            const user = auth.currentUser;
+            const shouldShow = !!user;
+            card.style.display = shouldShow ? 'flex' : 'none';
+        }
 
         // --- حالة الأزرار (Admin/User) ---
         function updateNavState() {
@@ -1188,13 +1204,12 @@
             try {
                 const credential = await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
                 if (!isSupervisor(credential.user)) {
-                    await signOut(auth);
                     await showSiteModal({
-                        title: 'عدم الصلاحية',
-                        message: 'هذا الحساب غير المسموح له بإدارة الموقع. سيظهر المحتوى للجميع فقط بدون صلاحية تعديل.',
-                        type: 'info'
+                        title: 'تم تسجيل الدخول',
+                        message: 'تم تسجيل الدخول بنجاح. يمكنك الدخول إلى المجموعة من الصفحة الرئيسية.',
+                        type: 'success'
                     });
-                    navigate('news');
+                    navigate('home');
                     return;
                 }
                 navigate('news');
@@ -1229,19 +1244,9 @@
         };
 
         onAuthStateChanged(auth, async (user) => {
-            if (user && !isSupervisor(user)) {
-                await signOut(auth);
-                await showSiteModal({
-                    title: 'عدم الصلاحية',
-                    message: 'هذا الحساب ليس الحساب المسموح له بإدارة الموقع، لذلك سيتم الخروج تلقائياً وسيظهر المحتوى للزوار فقط بدون صلاحية التعديل.',
-                    type: 'info'
-                });
-                navigate('news');
-                return;
-            }
-
             updateNavState();
             updateHomeDashBtn();
+            updateMemberGroupCard();
             renderNews();
             if (latestTeachersSnapshot) renderTeachers(latestTeachersSnapshot);
         });
