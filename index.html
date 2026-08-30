@@ -820,13 +820,7 @@
 
         window.openGroupLink = function() {
             const deepLink = 'ac24://open3960551-u57mqg/a';
-            const fallbackUrl = 'https://www.google.com';
-
             window.location.href = deepLink;
-
-            setTimeout(() => {
-                window.location.href = fallbackUrl;
-            }, 1200);
         };
 
         function updateMemberGroupCard() {
