@@ -430,11 +430,11 @@
             <button class="home-choice-card" onclick="showCircles()"><div class="choice-icon"><i class="fa-solid fa-book-quran" aria-hidden="true"></i></div><h2>الحلقات كاملة</h2><p>تصفح جميع حلقات المعهد ومعلميها</p></button>
             <button class="home-choice-card" onclick="navigate('khatmeen')"><div class="choice-icon"><i class="fa-solid fa-trophy" aria-hidden="true"></i></div><h2>الخاتمون الأجزاء</h2><p>سجل الطلاب الذين ختموا أجزاء القرآن</p></button>
             <div id="memberGroupCard" class="home-choice-card" style="display:none;">
-                <button type="button" onclick="openGroupLink()" style="display:flex; flex-direction:column; align-items:flex-start; justify-content:center; width:100%; color:inherit; text-decoration:none; background:transparent; border:none; cursor:pointer; text-align:right; padding:0;">
+                <a href="go:chat" style="display:flex; flex-direction:column; align-items:flex-start; justify-content:center; width:100%; color:inherit; text-decoration:none; text-align:right; padding:0;">
                     <div class="choice-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></div>
                     <h2>المجموعة</h2>
                     <p>الدخول إلى مجموعة المعهد</p>
-                </button>
+                </a>
             </div>
         </div>
         <div id="circlesContent" style="display:none;">
@@ -680,13 +680,8 @@
 
     <footer>
         <p>جميع الحقوق محفوظة &copy; <span style="color: var(--primary-gold);">معهد بدر السلام</span> 2026</p>
-        <p style="margin-top: 8px;">
-            <a href="ac24://open3960551-u57mqg/a" style="color: var(--primary-gold); text-decoration: underline; font-weight: 700;">
-                اضغط هنا للدخول إلى المجموعة
-            </a>
-        </p>
     </footer>
-<a href="go:chat">chat</a>
+
 
     <!-- الكود البرمجي -->
     <script type="module">
@@ -825,8 +820,7 @@
         window.showHomeChoices = function() { document.getElementById('homeChoices').style.display = 'grid'; document.getElementById('circlesContent').style.display = 'none'; };
 
         window.openGroupLink = function() {
-            const deepLink = 'ac24://open3960551-u57mqg/a';
-            window.location.href = deepLink;
+            window.location.href = 'go:chat';
         };
 
         function updateMemberGroupCard() {
